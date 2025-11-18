@@ -1,0 +1,22 @@
+# Par défaut, Git gère le texte mais normalise en LF dans le repo
+* text=auto
+
+# On force LF pour tout ce qui est code / SQL / web
+*.java   text eol=lf
+*.sql    text eol=lf
+*.xml    text eol=lf
+*.html   text eol=lf
+*.css    text eol=lf
+*.js     text eol=lf
+*.md     text eol=lf
+
+# Scripts
+*.sh     text eol=lf
+*.bat    text eol=crlf
+
+# Binaires (images, pdf, etc.)
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.pdf    binary
