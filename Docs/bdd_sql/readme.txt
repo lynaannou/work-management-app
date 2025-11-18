@@ -1,0 +1,1 @@
+this is a dossier where we can find all the sql of the creation fo the bd
