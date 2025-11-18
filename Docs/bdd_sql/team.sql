@@ -1,0 +1,3 @@
+
+CREATE DOMAIN status_domain AS TEXT 
+CHECK status (VALUE IN ('DRAFT', 'ACTIVE', 'ARCHIVED'));
