@@ -5,13 +5,15 @@ public class Workspace {
     private Date created_at;
     private int open_tasks_count;
     private int done_tasks_count;
-    public Workspace(String name, int team_id, List<IntStringPair> tasks, Date created_at, int open_tasks_count, int done_tasks_count) {
+    private int total_tasks_count;
+    public Workspace(String name, int team_id, List<> tasks, Date created_at, int open_tasks_count, int done_tasks_count, int total_tasks_count) {
         this.name = name;
         this.team_id = team_id;
         this.tasks = tasks;
         this.created_at = created_at;
         this.open_tasks_count = open_tasks_count;
         this.done_tasks_count = done_tasks_count;
+        this.total_tasks_count = total_tasks_count;
 
 
     }
@@ -24,7 +26,7 @@ public class Workspace {
     public Date getDate() {
         return created_at;
     }
-    public List<IntStringPair> getTasks() {
+    public List<TaskProgress> getTasks() {
         return tasks;
     }
     public Date getOpen_tasks_count() {
@@ -32,6 +34,9 @@ public class Workspace {
     }
     public Date getDone_tasks_count() {
         return done_tasks_count;
+    }
+    public int getTotal_tasks_count() {
+        return total_tasks_count;
     }
     public void setName(String name) {
         this.name = name;
@@ -51,5 +56,8 @@ public class Workspace {
     }
     public void setDone_tasks_count() {
         this.done_tasks_count = done_tasks_count;
+    }
+    public void setTotal_tasks_count(){
+        this.total_tasks_count = total_tasks_count;
     }
 }
