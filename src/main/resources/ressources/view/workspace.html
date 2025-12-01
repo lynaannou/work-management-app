@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ECLIPSEWORK</title>
+    <link rel="stylesheet" href="workspace.css" />
+</head>
+
+<body>
+
+<header>
+    <div class="left-zone">
+        <h1 class="logo-title">ECLIPSEWORK</h1>
+
+        <nav>
+            <a href="#">Dashboard</a>
+            <a href="#">Projects</a>
+            <a href="#">Tasks</a>
+        </nav>
+    </div>
+
+    <div class="user-zone">
+        <img src="user.png" class="user-icon" />
+        <span class="user-name">Full Name</span>
+    </div>
+</header>
+
+<!-- MAIN CONTENT -->
+<section class="workspace-container">
+    <h2 class="workspace-title">Monthly Progression</h2>
+
+    <div class="chart-container">
+
+        <div class="chart-header">
+            <span>Start Date</span>
+            <!-- dynamic dates inserted here -->
+            <span>End Date</span>
+        </div>
+
+        <div class="tasks-list">
+            <!-- dynamic tasks inserted here -->
+        </div>
+
+    </div>
+</section>
+
+<!-- ====== SINGLE FINAL loadDashboard FUNCTION ====== -->
+<script>
+    function loadDashboard(data) {
+        console.log("Dashboard received:", data);
+
+        // ===============================
+        // 1. Leader Name
+        // ===============================
+        if (data.leader) {
+            document.querySelector(".user-name").textContent =
+                data.leader.firstName + " " + data.leader.lastName;
+        }
+
+        // ===============================
+        // 2. Workspace Title
+        // ===============================
+        document.querySelector(".workspace-title").textContent =
+            "Monthly Progression – " + data.workspace.name;
+
+        // ===============================
+        // 3. TASKS (dynamic bars)
+        // ===============================
+        const tasksList = document.querySelector(".tasks-list");
+        tasksList.innerHTML = ""; // clear all demo content
+
+        data.tasks.forEach((t, i) => {
+            const row = document.createElement("div");
+            row.classList.add("task-row");
+
+            const bar = document.createElement("div");
+            bar.classList.add("task-bar");
+
+            bar.textContent = t.title;
+            bar.style.setProperty("--start", data.startPcts[i] + "%");
+            bar.style.setProperty("--end", data.endPcts[i] + "%");
+
+            row.appendChild(bar);
+            tasksList.appendChild(row);
+        });
+
+        // ===============================
+        // 4. TIMELINE DATES
+        // ===============================
+        const header = document.querySelector(".chart-header");
+
+        const keepStart = header.children[0];
+        const keepEnd = header.children[header.children.length - 1];
+
+        // remove all middle static dates
+        while (header.children.length > 2) {
+            header.removeChild(header.children[1]);
+        }
+
+        // insert dynamic dates
+        if (data.dateLabels) {
+            data.dateLabels.forEach(date => {
+                const span = document.createElement("span");
+                span.textContent = date;
+                header.insertBefore(span, keepEnd);
+            });
+        }
+    }
+</script>
+
+</body>
+</html>
