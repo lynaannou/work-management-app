@@ -103,8 +103,6 @@ public class WorkspaceApp extends Application {
     // ==================================================
 
     public void openWorkspace(int teamId) {
-        System.out.println("➡️ Opening workspace with teamId = " + teamId);
-
         URL url = getClass().getResource("/ressources/view/workspace.html");
         engine.load(url.toExternalForm());
 

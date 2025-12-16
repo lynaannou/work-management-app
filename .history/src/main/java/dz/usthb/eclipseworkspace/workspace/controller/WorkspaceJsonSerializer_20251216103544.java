@@ -14,7 +14,7 @@ public class WorkspaceJsonSerializer {
 
         sb.append("\"workspace\":{")
           .append("\"name\":\"").append(d.getWorkspace().getName()).append("\",")
-          .append("\"team_id\":").append(d.getWorkspace().getTeamId())
+          .append("\"team_id\":").append(d.getWorkspace().getTeam_id())
           .append("},");
 
 

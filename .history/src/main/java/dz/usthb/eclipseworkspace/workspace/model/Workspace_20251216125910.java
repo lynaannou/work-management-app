@@ -35,13 +35,4 @@ public class Workspace {
     public int getOpenTasksCount() { return openTasksCount; }
     public int getDoneTasksCount() { return doneTasksCount; }
     public int getTotalTasksCount() { return totalTasksCount; }
-    // ✅ ONLY camelCase setters
-    public void setTeamId(int teamId) { this.teamId = teamId; } 
-    public void setName(String name) { this.name = name; }
-    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
-    public void setOpenTasksCount(int openTasksCount) { this.openTasksCount = openTasksCount; }
-    public void setDoneTasksCount(int doneTasksCount) { this.doneTasksCount = doneTasksCount; }
-    public void setTotalTasksCount(int totalTasksCount) { this.totalTasksCount = totalTasksCount; }
-    
-
 }

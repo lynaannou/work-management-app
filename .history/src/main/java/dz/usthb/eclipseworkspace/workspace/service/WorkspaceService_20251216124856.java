@@ -57,7 +57,6 @@ public class WorkspaceService {
     System.out.println("\n====================================");
     System.out.println("DEBUG getDashboard(" + workspaceId + ")");
     System.out.println("====================================");
-        System.out.println("📦 Loading dashboard for teamId = " + workspaceId);
 
 
     Workspace workspace = daoWorkspace.findById(workspaceId).orElse(null);

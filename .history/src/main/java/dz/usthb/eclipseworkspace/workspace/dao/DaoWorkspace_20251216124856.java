@@ -1,6 +1,7 @@
 package dz.usthb.eclipseworkspace.workspace.dao;
 
 import dz.usthb.eclipseworkspace.workspace.model.Workspace;
+import dz.usthb.eclipseworkspace.workspace.model.Task;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -15,15 +16,12 @@ public class DaoWorkspace {
         this.connection = connection;
     }
 
-    // ==========================
-    // FIND BY TEAM ID
-    // ==========================
     public Optional<Workspace> findById(int teamId) {
-        System.out.println("🗄️ Fetching team from DB: team_id = " + teamId);
 
         String sql = "SELECT * FROM team WHERE team_id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
             ps.setInt(1, teamId);
 
             try (ResultSet rs = ps.executeQuery()) {
@@ -39,9 +37,6 @@ public class DaoWorkspace {
         return Optional.empty();
     }
 
-    // ==========================
-    // FIND ALL TEAMS
-    // ==========================
     public List<Workspace> getAll() {
 
         List<Workspace> list = new ArrayList<>();
@@ -61,9 +56,6 @@ public class DaoWorkspace {
         return list;
     }
 
-    // ==========================
-    // FIND TEAMS BY USER
-    // ==========================
     public List<Workspace> findByUser(int userId) throws SQLException {
 
         String sql = """
@@ -88,18 +80,20 @@ public class DaoWorkspace {
         return result;
     }
 
-    // ==========================
-    // ROW MAPPER (SINGLE SOURCE OF TRUTH)
-    // ==========================
+    // ✅ THIS WAS MISSING
     private Workspace mapRow(ResultSet rs) throws SQLException {
-
         return new Workspace(
-                rs.getInt("team_id"),           // DB column
+                rs.getInt("team_id"),
                 rs.getString("name"),
                 rs.getDate("created_at"),
                 rs.getInt("open_tasks_count"),
                 rs.getInt("done_tasks_count"),
                 rs.getInt("total_tasks_count")
         );
+    }
+
+    /** Later */
+    private List<Task> fetchTasksForTeam(int teamId) {
+        return new ArrayList<>();
     }
 }

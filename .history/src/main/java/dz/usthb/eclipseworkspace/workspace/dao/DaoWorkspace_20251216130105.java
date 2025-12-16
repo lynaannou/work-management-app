@@ -19,7 +19,6 @@ public class DaoWorkspace {
     // FIND BY TEAM ID
     // ==========================
     public Optional<Workspace> findById(int teamId) {
-        System.out.println("🗄️ Fetching team from DB: team_id = " + teamId);
 
         String sql = "SELECT * FROM team WHERE team_id = ?";
 

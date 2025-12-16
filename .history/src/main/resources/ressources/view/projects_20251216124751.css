@@ -1,0 +1,170 @@
+/* =========================
+   RESET
+========================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+body {
+  background: #ffffff;
+  color: #111;
+}
+
+/* =========================
+   NAVBAR
+========================= */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 40px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 700;
+  color: #007bff;
+}
+
+.nav-links {
+  display: flex;
+  gap: 40px;
+}
+
+.nav-links span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #999;
+  cursor: pointer;
+}
+
+.nav-links .active {
+  color: #000;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #eaf2fb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =========================
+   PAGE TITLE
+========================= */
+h2 {
+  padding: 30px 40px 20px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+/* =========================
+   TABLE
+========================= */
+table {
+  width: calc(100% - 80px);
+  margin: 0 40px 40px;
+  border-collapse: collapse;
+}
+
+thead th {
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+  color: #666;
+  padding-bottom: 14px;
+}
+
+tbody tr {
+  border-top: 1px solid #eaeaea;
+}
+
+tbody td {
+  padding: 18px 0;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+/* =========================
+   PROJECT NAME
+========================= */
+.project-name {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.project-name .edit {
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+/* =========================
+   ROLE BADGES
+========================= */
+.role {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.role-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+.role.leader .role-dot {
+  background: #6a0dad;
+}
+
+.role.member .role-dot {
+  background: #007bff;
+}
+
+.role span {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+button {
+  padding: 8px 18px;
+  border-radius: 20px;
+  border: none;
+  background: #eaf2fb;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #dce9f8;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 900px) {
+  table {
+    font-size: 12px;
+  }
+}
