@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ECLIPSEWORK – Projects</title>
+  <link rel="stylesheet" href="projects.css">
+</head>
+<body>
+
+<h2>My Projects</h2>
+
+<table id="projectsTable">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Leader</th>
+      <th>Members</th>
+      <th>Tasks</th>
+      <th>Progress</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+function loadProjects(data) {
+  const tbody = document.querySelector("#projectsTable tbody");
+  tbody.innerHTML = "";
+
+  data.forEach(ws => {
+    const done = ws.progress.done;
+    const total = ws.progress.total;
+    const pct = total === 0 ? 0 : Math.round(done / total * 100);
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${ws.workspace.name}</td>
+      <td>${ws.leader.firstName} ${ws.leader.lastName}</td>
+      <td>${ws.members.length}</td>
+      <td>${ws.tasks.length}</td>
+      <td>
+        <button onclick="openWorkspace(${ws.workspace.teamId})">
+          ${pct}% – See progression
+        </button>
+      </td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+}
+
+// JavaFX hook
+function openWorkspace(teamId) {
+  if (window.java && window.java.openWorkspace) {
+    window.java.openWorkspace(teamId);
+  }
+}
+</script>
+
+</body>
+</html>

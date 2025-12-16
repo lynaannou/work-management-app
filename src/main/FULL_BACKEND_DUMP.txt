@@ -1,0 +1,959 @@
+==================== WorkspaceDashboard.java ====================
+package dz.usthb.eclipseworkspace.workspace.service.builder;
+
+import dz.usthb.eclipseworkspace.workspace.model.AppUser;
+import dz.usthb.eclipseworkspace.workspace.model.Task;
+import dz.usthb.eclipseworkspace.workspace.model.Workspace;
+import dz.usthb.eclipseworkspace.workspace.service.components.WorkspaceComposite;
+import dz.usthb.eclipseworkspace.workspace.service.components.TaskProgress;
+
+
+import java.util.List;
+
+public class WorkspaceDashboard {
+
+    private Workspace workspace;
+    private List<Task> tasks;
+    private List<AppUser> members;
+    private WorkspaceComposite composite;
+    private TaskProgress progress;
+    private AppUser leader; // <- Team leader user (full info)
+    private List<Float> startPcts;
+    private List<Float> endPcts;
+    private List<String> dateLabels;
+    
+
+
+    // ----------- GETTERS & SETTERS ------------
+
+    public Workspace getWorkspace() {
+        return workspace;
+    }
+
+    public void setWorkspace(Workspace workspace) {
+        this.workspace = workspace;
+    }
+
+    public List<Task> getTasks() {
+        return tasks;
+    }
+
+    public void setTasks(List<Task> tasks) {
+        this.tasks = tasks;
+    }
+
+    public List<AppUser> getMembers() {
+        return members;
+    }
+
+    public void setMembers(List<AppUser> members) {
+        this.members = members;
+    }
+
+    public WorkspaceComposite getComposite() {
+        return composite;
+    }
+
+    public void setComposite(WorkspaceComposite composite) {
+        this.composite = composite;
+    }
+
+    public TaskProgress getProgress() {
+        return progress;
+    }
+
+    public void setProgress(TaskProgress progress) {
+        this.progress = progress;
+    }
+
+    public AppUser getLeader() {
+        return leader;
+    }
+
+    public void setLeader(AppUser leader) {
+        this.leader = leader;
+    }
+    public List<Float> getStartPcts() { return startPcts; }
+public List<Float> getEndPcts() { return endPcts; }
+public List<String> getDateLabels() { return dateLabels; }
+
+public void setStartPcts(List<Float> startPcts) { this.startPcts = startPcts; }
+public void setEndPcts(List<Float> endPcts) { this.endPcts = endPcts; }
+public void setDateLabels(List<String> dateLabels) { this.dateLabels = dateLabels; }
+}
+
+==================== WorkspaceDashboardBuilder.java ====================
+package dz.usthb.eclipseworkspace.workspace.service.builder;
+
+import dz.usthb.eclipseworkspace.workspace.model.AppUser;
+import dz.usthb.eclipseworkspace.workspace.model.Task;
+import dz.usthb.eclipseworkspace.workspace.model.Workspace;
+import dz.usthb.eclipseworkspace.workspace.service.components.WorkspaceComposite;
+import dz.usthb.eclipseworkspace.workspace.service.components.TaskProgress;
+
+import java.util.List;
+
+public class WorkspaceDashboardBuilder {
+
+    private Workspace workspace;
+    private List<Task> tasks;
+    private List<AppUser> members;
+    private AppUser leader;
+    private WorkspaceComposite composite;
+    private TaskProgress progress;
+    private List<Float> startPcts;
+    private List<Float> endPcts;
+    private List<String> dateLabels;
+
+    // ------------------------------
+    // Reset builder between dashboards
+    // ------------------------------
+    public void reset() {
+        workspace = null;
+        tasks = null;
+        members = null;
+        leader = null;
+        composite = null;
+        progress = null;
+        startPcts = null;
+        endPcts = null;
+        dateLabels = null;
+    }
+
+    // ------------------------------
+    // Builder SETTERS (step by step)
+    // ------------------------------
+    public void setWorkspace(Workspace w) {
+        this.workspace = w;
+    }
+
+    public void setTasks(List<Task> t) {
+        this.tasks = t;
+    }
+
+    public void setMembers(List<AppUser> m) {
+        this.members = m;
+    }
+
+    public void setLeader(AppUser leader) {
+        this.leader = leader;
+    }
+
+    public void setComposite(WorkspaceComposite c) {
+        this.composite = c;
+    }
+
+    public void setProgress(TaskProgress p) {
+        this.progress = p;
+    }
+
+    public void setStartPcts(List<Float> startPcts) {
+        this.startPcts = startPcts;
+    }
+
+    public void setEndPcts(List<Float> endPcts) {
+        this.endPcts = endPcts;
+    }
+
+    public void setDateLabels(List<String> dateLabels) {
+        this.dateLabels = dateLabels;
+    }
+
+    // ------------------------------
+    // Final product construction
+    // ------------------------------
+    public WorkspaceDashboard build() {
+        WorkspaceDashboard d = new WorkspaceDashboard();
+
+        d.setWorkspace(workspace);
+        d.setTasks(tasks);
+        d.setMembers(members);
+        d.setLeader(leader);
+        d.setComposite(composite);
+        d.setProgress(progress);
+        d.setStartPcts(startPcts);
+        d.setEndPcts(endPcts);
+        d.setDateLabels(dateLabels);
+
+        return d;
+    }
+}
+
+==================== WorkspaceDashboardDirector.java ====================
+package dz.usthb.eclipseworkspace.workspace.service.builder;
+
+import dz.usthb.eclipseworkspace.workspace.model.AppUser;
+import dz.usthb.eclipseworkspace.workspace.model.Task;
+import dz.usthb.eclipseworkspace.workspace.model.Workspace;
+import dz.usthb.eclipseworkspace.workspace.service.components.WorkspaceComposite;
+import dz.usthb.eclipseworkspace.workspace.service.components.TaskProgress;
+
+import java.util.List;
+
+public class WorkspaceDashboardDirector {
+
+    public WorkspaceDashboard buildDashboard(
+            WorkspaceDashboardBuilder builder,
+            Workspace ws,
+            List<Task> tasks,
+            List<AppUser> members,
+            AppUser leader,
+            WorkspaceComposite composite,
+            TaskProgress progress,
+            List<Float> startPcts,
+            List<Float> endPcts,
+            List<String> dateLabels
+    ) {
+        builder.reset();
+
+        builder.setWorkspace(ws);
+        builder.setTasks(tasks);
+        builder.setMembers(members);
+        builder.setLeader(leader);
+        builder.setComposite(composite);
+        builder.setProgress(progress);
+
+        builder.setStartPcts(startPcts);
+        builder.setEndPcts(endPcts);
+        builder.setDateLabels(dateLabels);
+
+        return builder.build();
+    }
+}
+
+==================== TeamController.java ====================
+package dz.usthb.eclipseworkspace.team.controller;
+
+import dz.usthb.eclipseworkspace.team.service.TeamMemberService;
+import dz.usthb.eclipseworkspace.team.model.TeamMember;
+import dz.usthb.eclipseworkspace.workspace.model.AppUser;
+import java.util.List;
+
+public class TeamController {
+    private final TeamMemberService teamService;
+    
+    public TeamController(TeamMemberService teamService) {
+        this.teamService = teamService;
+    }
+    
+    public TeamMember addMemberToTeam(AppUser requester, Long teamId, Long userId, String role) {
+        try {
+            return teamService.addMember(requester, teamId, userId, role);
+        } catch (Exception e) {
+            System.err.println("Erreur lors de l'ajout du membre: " + e.getMessage());
+            return null;
+        }
+    }
+    
+    public boolean removeMemberFromTeam(AppUser requester, Long teamMemberId) {
+        try {
+            return teamService.removeMember(requester, teamMemberId);
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la suppression du membre: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    public boolean updateMemberRole(AppUser requester, Long teamMemberId, String newRole) {
+        try {
+            return teamService.updateMemberRole(requester, teamMemberId, newRole);
+        } catch (Exception e) {
+            System.err.println("Erreur lors du changement de rôle: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    public List<TeamMember> getTeamMembers(Long teamId) {
+        try {
+            return teamService.getTeamMembers(teamId);
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la récupération des membres: " + e.getMessage());
+            return List.of();
+        }
+    }
+    
+    public boolean canAssignTask(Long teamId, Long userId) {
+        try {
+            return teamService.canAssignTaskToMember(teamId, userId);
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la vérification: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    public List<TeamMember> getOverloadedMembers(Long teamId) {
+        try {
+            return teamService.getOverloadedMembers(teamId);
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la récupération des membres surchargés: " + e.getMessage());
+            return List.of();
+        }
+    }
+}
+==================== TeamMemberService.java ====================
+package dz.usthb.eclipseworkspace.team.service;
+
+import dz.usthb.eclipseworkspace.team.dao.TeamMemberDao;
+import dz.usthb.eclipseworkspace.team.model.TeamMember;
+import dz.usthb.eclipseworkspace.team.model.PermissionRequest;
+import dz.usthb.eclipseworkspace.team.exceptions.PermissionException;
+import dz.usthb.eclipseworkspace.workspace.model.AppUser;
+import java.util.List;
+
+public class TeamMemberService extends TeamSubject {
+    private final TeamMemberDao teamMemberDao;
+    private final PermissionManager permissionManager;
+    
+    public TeamMemberService(TeamMemberDao teamMemberDao) {
+        this.teamMemberDao = teamMemberDao;
+        this.permissionManager = new PermissionManager(teamMemberDao);
+        
+        
+        addObserver(new TaskBoardObserver());
+        addObserver(new CalendarObserver());
+    }
+    
+    public TeamMemberService(TeamMemberDao teamMemberDao, 
+                           PermissionManager permissionManager) {
+        this.teamMemberDao = teamMemberDao;
+        this.permissionManager = permissionManager;
+        
+        addObserver(new TaskBoardObserver());
+        addObserver(new CalendarObserver());
+    }
+    
+    public TeamMember addMember(AppUser requester, Long teamId, Long userId, String role) 
+            throws Exception {
+        
+        System.out.println("➕ Tentative d'ajout du membre " + userId + " à l'équipe " + teamId);
+        
+        // Vérification limite de membres (7 max)
+        int currentMembers = teamMemberDao.countMembersByTeam(teamId);
+        if (currentMembers >= 7) {
+            throw new Exception("L'équipe a déjà atteint le maximum de 7 membres");
+        }
+        
+        // Validation des permissions
+        PermissionRequest request = new PermissionRequest(requester, teamId, "ADD_MEMBER", userId);
+        if (!permissionManager.checkPermission(request)) {
+            throw new PermissionException("Permission refusée pour ajouter un membre");
+        }
+        
+        // Vérification si l'utilisateur est déjà membre
+        if (teamMemberDao.exists(teamId, userId)) {
+            throw new Exception(" L'utilisateur est déjà membre de cette équipe");
+        }
+        
+        // Validation du rôle
+        if (!"LEAD".equals(role) && !"MEMBER".equals(role)) {
+            throw new Exception(" Rôle invalide. Doit être 'LEAD' ou 'MEMBER'");
+        }
+        
+        // Création et sauvegarde du membre
+        TeamMember newMember = new TeamMember(teamId, userId, role);
+        Long memberId = teamMemberDao.create(newMember);
+        newMember.setTeamMemberId(memberId);
+        
+        
+        notifyMemberAdded(newMember);
+        
+        System.out.println(" Membre ajouté avec succès: " + newMember);
+        return newMember;
+    }
+    
+    public boolean removeMember(AppUser requester, Long teamMemberId) throws Exception {
+        TeamMember memberToRemove = teamMemberDao.findById(teamMemberId)
+            .orElseThrow(() -> new Exception(" Membre non trouvé"));
+        
+        System.out.println("➖ Tentative de retrait du membre " + memberToRemove.getUserId());
+        
+        PermissionRequest request = new PermissionRequest(
+            requester, memberToRemove.getTeamId(), "DELETE_MEMBER", memberToRemove.getUserId());
+        
+        if (!permissionManager.checkPermission(request)) {
+            throw new PermissionException(" Permission refusée pour supprimer un membre");
+        }
+        
+        // Empêcher la suppression du dernier LEAD
+        if ("LEAD".equals(memberToRemove.getRole())) {
+            List<TeamMember> teamMembers = teamMemberDao.findByTeamId(memberToRemove.getTeamId());
+            long leadCount = teamMembers.stream()
+                .filter(m -> "LEAD".equals(m.getRole()))
+                .count();
+            if (leadCount <= 1) {
+                throw new Exception(" Impossible de supprimer le dernier LEAD de l'équipe");
+            }
+        }
+        
+        boolean success = teamMemberDao.delete(teamMemberId);
+        if (success) {
+            notifyMemberRemoved(memberToRemove);
+            System.out.println(" Membre retiré avec succès: " + memberToRemove);
+        }
+        
+        return success;
+    }
+    
+    public boolean updateMemberRole(AppUser requester, Long teamMemberId, String newRole) throws Exception {
+        TeamMember member = teamMemberDao.findById(teamMemberId)
+            .orElseThrow(() -> new Exception("Membre non trouvé"));
+        
+        String oldRole = member.getRole();
+        
+        System.out.println(" Tentative de changement de rôle de " + oldRole + " à " + newRole);
+        
+        PermissionRequest request = new PermissionRequest(
+            requester, member.getTeamId(), "CHANGE_ROLE", member.getUserId());
+        request.setNewRole(newRole);
+        
+        if (!permissionManager.checkPermission(request)) {
+            throw new PermissionException(" Permission refusée pour changer le rôle");
+        }
+        
+        if (!"LEAD".equals(newRole) && !"MEMBER".equals(newRole)) {
+            throw new Exception(" Rôle invalide. Doit être 'LEAD' ou 'MEMBER'");
+        }
+        
+        boolean success = teamMemberDao.updateRole(teamMemberId, newRole);
+        if (success) {
+            member.setRole(newRole);
+            notifyMemberRoleChanged(member, oldRole);
+            System.out.println(" Rôle changé avec succès");
+        }
+        
+        return success;
+    }
+    
+    // Les autres méthodes
+    public List<TeamMember> getTeamMembers(Long teamId) throws Exception {
+        return teamMemberDao.findByTeamId(teamId);
+    }
+    
+    public boolean isUserMemberOfTeam(Long userId, Long teamId) throws Exception {
+        return teamMemberDao.findByTeamAndUser(teamId, userId).isPresent();
+    }
+    
+    public List<TeamMember> getOverloadedMembers(Long teamId) throws Exception {
+        return teamMemberDao.findOverloadedMembers(teamId);
+    }
+    
+    public TeamMember getTeamMemberByUser(Long teamId, Long userId) throws Exception {
+        return teamMemberDao.findByTeamAndUser(teamId, userId)
+            .orElseThrow(() -> new Exception("Utilisateur non membre de cette équipe"));
+    }
+    
+    public boolean canAssignTaskToMember(Long teamId, Long userId) throws Exception {
+        TeamMember member = teamMemberDao.findByTeamAndUser(teamId, userId)
+            .orElseThrow(() -> new Exception("Membre non trouvé dans l'équipe"));
+        
+        return member.getTaskCount() < 5;
+    }
+    
+    public int getMemberTaskCount(Long teamMemberId) throws Exception {
+        TeamMember member = teamMemberDao.findById(teamMemberId)
+            .orElseThrow(() -> new Exception("Membre non trouvé"));
+        return member.getTaskCount() != null ? member.getTaskCount() : 0;
+    }
+}
+==================== TeamMemberDaoJdbc.java ====================
+package dz.usthb.eclipseworkspace.team.dao;
+
+import dz.usthb.eclipseworkspace.team.model.TeamMember;
+import dz.usthb.eclipseworkspace.config.DBConnection;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+public class TeamMemberDaoJdbc implements TeamMemberDao {
+    
+    @Override
+    public Long create(TeamMember teamMember) throws SQLException {
+        String sql = "INSERT INTO team_member (team_id, user_id, role, added_at) VALUES (?, ?, ?, ?)";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            
+            ps.setLong(1, teamMember.getTeamId());
+            ps.setLong(2, teamMember.getUserId());
+            ps.setString(3, teamMember.getRole());
+            ps.setDate(4, teamMember.getAddedAt() != null ? teamMember.getAddedAt() : new Date(System.currentTimeMillis()));
+            
+            ps.executeUpdate();
+            
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+            }
+        }
+        throw new SQLException("Échec de la création du membre d'équipe");
+    }
+    
+    @Override
+    public Optional<TeamMember> findById(Long teamMemberId) throws SQLException {
+        String sql = "SELECT tm.*, COALESCE(COUNT(t.task_id), 0) as task_count " +
+                    "FROM team_member tm " +
+                    "LEFT JOIN task t ON tm.team_member_id = t.team_member_id " +
+                    "WHERE tm.team_member_id = ? " +
+                    "GROUP BY tm.team_member_id";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setLong(1, teamMemberId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapResultSetToTeamMember(rs));
+                }
+            }
+        }
+        return Optional.empty();
+    }
+    
+    @Override
+    public List<TeamMember> findByTeamId(Long teamId) throws SQLException {
+        String sql = "SELECT tm.*, COALESCE(COUNT(t.task_id), 0) as task_count " +
+                    "FROM team_member tm " +
+                    "LEFT JOIN task t ON tm.team_member_id = t.team_member_id " +
+                    "WHERE tm.team_id = ? " +
+                    "GROUP BY tm.team_member_id " +
+                    "ORDER BY tm.role DESC, tm.added_at";
+        
+        List<TeamMember> members = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setLong(1, teamId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    members.add(mapResultSetToTeamMember(rs));
+                }
+            }
+        }
+        return members;
+    }
+    
+    @Override
+    public List<TeamMember> findByUserId(Long userId) throws SQLException {
+        String sql = "SELECT tm.*, COALESCE(COUNT(t.task_id), 0) as task_count " +
+                    "FROM team_member tm " +
+                    "LEFT JOIN task t ON tm.team_member_id = t.team_member_id " +
+                    "WHERE tm.user_id = ? " +
+                    "GROUP BY tm.team_member_id";
+        
+        List<TeamMember> members = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setLong(1, userId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    members.add(mapResultSetToTeamMember(rs));
+                }
+            }
+        }
+        return members;
+    }
+    
+    @Override
+    public boolean updateRole(Long teamMemberId, String newRole) throws SQLException {
+        String sql = "UPDATE team_member SET role = ? WHERE team_member_id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, newRole);
+            ps.setLong(2, teamMemberId);
+            
+            return ps.executeUpdate() > 0;
+        }
+    }
+    
+    @Override
+    public boolean delete(Long teamMemberId) throws SQLException {
+        String sql = "DELETE FROM team_member WHERE team_member_id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setLong(1, teamMemberId);
+            return ps.executeUpdate() > 0;
+        }
+    }
+    
+    @Override
+    public boolean exists(Long teamId, Long userId) throws SQLException {
+        String sql = "SELECT 1 FROM team_member WHERE team_id = ? AND user_id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setLong(1, teamId);
+            ps.setLong(2, userId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+    
+    @Override
+    public Optional<TeamMember> findByTeamAndUser(Long teamId, Long userId) throws SQLException {
+        String sql = "SELECT tm.*, COALESCE(COUNT(t.task_id), 0) as task_count " +
+                    "FROM team_member tm " +
+                    "LEFT JOIN task t ON tm.team_member_id = t.team_member_id " +
+                    "WHERE tm.team_id = ? AND tm.user_id = ? " +
+                    "GROUP BY tm.team_member_id";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setLong(1, teamId);
+            ps.setLong(2, userId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapResultSetToTeamMember(rs));
+                }
+            }
+        }
+        return Optional.empty();
+    }
+    
+    @Override
+    public int countMembersByTeam(Long teamId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM team_member WHERE team_id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setLong(1, teamId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
+    
+    @Override
+    public List<TeamMember> findOverloadedMembers(Long teamId) throws SQLException {
+        String sql = "SELECT tm.*, COALESCE(COUNT(t.task_id), 0) as task_count " +
+                    "FROM team_member tm " +
+                    "LEFT JOIN task t ON tm.team_member_id = t.team_member_id " +
+                    "WHERE tm.team_id = ? " +
+                    "GROUP BY tm.team_member_id " +
+                    "HAVING COALESCE(COUNT(t.task_id), 0) >= 5";
+        
+        List<TeamMember> overloaded = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setLong(1, teamId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    overloaded.add(mapResultSetToTeamMember(rs));
+                }
+            }
+        }
+        return overloaded;
+    }
+    
+    private TeamMember mapResultSetToTeamMember(ResultSet rs) throws SQLException {
+        TeamMember member = new TeamMember();
+        member.setTeamMemberId(rs.getLong("team_member_id"));
+        member.setTeamId(rs.getLong("team_id"));
+        member.setUserId(rs.getLong("user_id"));
+        member.setRole(rs.getString("role"));
+        member.setAddedAt(rs.getDate("added_at"));
+        member.setTaskCount(rs.getInt("task_count"));
+        return member;
+    }
+}
+==================== TeamMember.java ====================
+package dz.usthb.eclipseworkspace.team.model;
+
+import java.sql.Date;
+
+public class TeamMember {
+    private Long teamMemberId;
+    private Long teamId;
+    private Long userId;
+    private String role; 
+    private Date addedAt; 
+    private Integer taskCount;
+    
+    public TeamMember() {}
+    
+    public TeamMember(Long teamId, Long userId, String role) {
+        this.teamId = teamId;
+        this.userId = userId;
+        this.role = role;
+        this.addedAt = new Date(System.currentTimeMillis()); 
+    }
+    
+    public Long getTeamMemberId() { return teamMemberId; }
+    public void setTeamMemberId(Long teamMemberId) { this.teamMemberId = teamMemberId; }
+    
+    public Long getTeamId() { return teamId; }
+    public void setTeamId(Long teamId) { this.teamId = teamId; }
+    
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
+    
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+    
+    public Date getAddedAt() { return addedAt; }
+    public void setAddedAt(Date addedAt) { this.addedAt = addedAt; }
+    
+    public Integer getTaskCount() { return taskCount; }
+    public void setTaskCount(Integer taskCount) { this.taskCount = taskCount; }
+    
+    @Override
+    public String toString() {
+        return String.format(
+            "TeamMember{id=%d, teamId=%d, userId=%d, role='%s', tasks=%d}",
+            teamMemberId, teamId, userId, role, taskCount
+        );
+    }
+}
+==================== PermissionManager.java ====================
+package dz.usthb.eclipseworkspace.team.service;
+
+import dz.usthb.eclipseworkspace.team.dao.TeamMemberDao;
+import dz.usthb.eclipseworkspace.team.model.TeamMember;
+import dz.usthb.eclipseworkspace.team.model.PermissionRequest;
+import dz.usthb.eclipseworkspace.team.exceptions.PermissionException;
+import dz.usthb.eclipseworkspace.workspace.model.AppUser;
+import java.util.Optional;
+
+public class PermissionManager {
+    private final TeamMemberDao teamMemberDao;
+    
+    public PermissionManager(TeamMemberDao teamMemberDao) {
+        this.teamMemberDao = teamMemberDao;
+    }
+    
+    public boolean checkPermission(PermissionRequest request) throws PermissionException {
+        if ("DELETE_MEMBER".equals(request.getAction()) && 
+            request.getRequester().getUser_id() == request.getTargetUserId()) {
+            throw new PermissionException("❌ Un utilisateur ne peut pas se retirer lui-même de l'équipe");
+        }
+        
+        return checkLeadPermissions(request);
+    }
+    
+    private boolean checkLeadPermissions(PermissionRequest request) throws PermissionException {
+        try {
+            Optional<TeamMember> requesterMember = teamMemberDao.findByTeamAndUser(
+                request.getTeamId(), Long.valueOf(request.getRequester().getUser_id()));
+                
+            boolean isLead = requesterMember.isPresent() && "LEAD".equals(requesterMember.get().getRole());
+            
+            if (isLead) {
+                System.out.println("✅ PermissionManager: LEAD autorisé pour " + request.getAction());
+                return true;
+            }
+            
+            switch (request.getAction()) {
+                case "ADD_MEMBER":
+                    throw new PermissionException(" Seul le LEAD peut ajouter des membres à l'équipe");
+                    
+                case "CHANGE_ROLE":
+                    if ("LEAD".equals(request.getNewRole())) {
+                        throw new PermissionException(" Seul un LEAD peut attribuer le rôle LEAD");
+                    }
+                    if (request.getRequester().getUser_id() == request.getTargetUserId()) {
+                        return "MEMBER".equals(request.getNewRole());
+                    }
+                    throw new PermissionException(" Permission insuffisante pour changer le rôle d'un autre membre");
+                    
+                case "DELETE_MEMBER":
+                    throw new PermissionException(" Seul le LEAD peut supprimer des membres");
+                    
+                default:
+                    throw new PermissionException(" Action non autorisée: " + request.getAction());
+            }
+            
+        } catch (Exception e) {
+            if (e instanceof PermissionException) {
+                throw (PermissionException) e;
+            }
+            throw new PermissionException("Erreur de vérification des permissions: " + e.getMessage(), e);
+        }
+    }
+}
+==================== TaskBoardObserver.java ====================
+package dz.usthb.eclipseworkspace.team.service;
+
+import dz.usthb.eclipseworkspace.team.model.TeamMember;
+
+public class TaskBoardObserver implements TeamObserver {
+    
+    @Override
+    public void onMemberAdded(TeamMember newMember) {
+        System.out.println(" TaskBoard: Mise à jour du board pour le nouveau membre " + newMember.getUserId());
+        updateTaskAssignments(newMember.getTeamId());
+    }
+    
+    @Override
+    public void onMemberRemoved(TeamMember removedMember) {
+        System.out.println(" TaskBoard: Retrait des tâches assignées au membre " + removedMember.getUserId());
+        reassignTasksFromMember(removedMember);
+    }
+    
+    @Override
+    public void onMemberRoleChanged(TeamMember member, String oldRole) {
+        System.out.println(" TaskBoard: Mise à jour des permissions pour le membre " + member.getUserId());
+        updateMemberPermissions(member);
+    }
+    
+    private void updateTaskAssignments(Long teamId) {
+        System.out.println("Mise à jour des assignations pour l'équipe " + teamId);
+    }
+    
+    private void reassignTasksFromMember(TeamMember removedMember) {
+        System.out.println("Réassignation des tâches du membre " + removedMember.getUserId());
+    }
+    
+    private void updateMemberPermissions(TeamMember member) {
+        System.out.println("Mise à jour des permissions pour " + member.getUserId());
+    }
+}
+==================== CalendarObserver.java ====================
+package dz.usthb.eclipseworkspace.team.service;
+
+import dz.usthb.eclipseworkspace.team.model.TeamMember;
+
+public class CalendarObserver implements TeamObserver {
+    
+    @Override
+    public void onMemberAdded(TeamMember newMember) {
+        System.out.println("📅 Calendar: Ajout du membre " + newMember.getUserId() + " au calendrier d'équipe");
+        syncTeamCalendar(newMember);
+    }
+    
+    @Override
+    public void onMemberRemoved(TeamMember removedMember) {
+        System.out.println("📅 Calendar: Retrait du membre " + removedMember.getUserId() + " du calendrier d'équipe");
+        unsyncTeamCalendar(removedMember);
+    }
+    
+    @Override
+    public void onMemberRoleChanged(TeamMember member, String oldRole) {
+        System.out.println("📅 Calendar: Mise à jour des droits calendrier pour " + member.getUserId());
+        updateCalendarPermissions(member);
+    }
+    
+    private void syncTeamCalendar(TeamMember member) {
+        System.out.println("Synchronisation calendrier pour " + member.getUserId());
+    }
+    
+    private void unsyncTeamCalendar(TeamMember member) {
+        System.out.println("Désynchronisation calendrier pour " + member.getUserId());
+    }
+    
+    private void updateCalendarPermissions(TeamMember member) {
+        System.out.println("Mise à jour permissions calendrier pour " + member.getUserId());
+    }
+}
+==================== TeamObserver.java ====================
+package dz.usthb.eclipseworkspace.team.service;
+
+import dz.usthb.eclipseworkspace.team.model.TeamMember;
+
+public interface TeamObserver {
+    void onMemberAdded(TeamMember newMember);
+    void onMemberRemoved(TeamMember removedMember);
+    void onMemberRoleChanged(TeamMember member, String oldRole);
+}
+==================== TeamSubject.java ====================
+package dz.usthb.eclipseworkspace.team.service;
+
+import dz.usthb.eclipseworkspace.team.model.TeamMember;
+import java.util.ArrayList;
+import java.util.List;
+
+public class TeamSubject {
+    private final List<TeamObserver> observers = new ArrayList<>();
+    
+    public void addObserver(TeamObserver observer) {
+        observers.add(observer);
+    }
+    
+    public void removeObserver(TeamObserver observer) {
+        observers.remove(observer);
+    }
+    
+    protected void notifyMemberAdded(TeamMember newMember) {
+        for (TeamObserver observer : observers) {
+            observer.onMemberAdded(newMember);
+        }
+    }
+    
+    protected void notifyMemberRemoved(TeamMember removedMember) {
+        for (TeamObserver observer : observers) {
+            observer.onMemberRemoved(removedMember);
+        }
+    }
+    
+    protected void notifyMemberRoleChanged(TeamMember member, String oldRole) {
+        for (TeamObserver observer : observers) {
+            observer.onMemberRoleChanged(member, oldRole);
+        }
+    }
+}
+==================== PermissionRequest.java ====================
+package dz.usthb.eclipseworkspace.team.model;
+
+import dz.usthb.eclipseworkspace.workspace.model.AppUser;
+
+public class PermissionRequest {
+    private AppUser requester;
+    private Long teamId;
+    private String action; 
+    private Long targetUserId;
+    private String newRole;
+    
+    public PermissionRequest(AppUser requester, Long teamId, String action, Long targetUserId) {
+        this.requester = requester;
+        this.teamId = teamId;
+        this.action = action;
+        this.targetUserId = targetUserId;
+    }
+   
+    public AppUser getRequester() { return requester; }
+    public void setRequester(AppUser requester) { this.requester = requester; }
+    
+    public Long getTeamId() { return teamId; }
+    public void setTeamId(Long teamId) { this.teamId = teamId; }
+    
+    public String getAction() { return action; }
+    public void setAction(String action) { this.action = action; }
+    
+    public Long getTargetUserId() { return targetUserId; }
+    public void setTargetUserId(Long targetUserId) { this.targetUserId = targetUserId; }
+    
+    public String getNewRole() { return newRole; }
+    public void setNewRole(String newRole) { this.newRole = newRole; }
+}
+==================== ValidationStrategy.java ====================
+package dz.usthb.eclipseworkspace.team.service;
+
+import dz.usthb.eclipseworkspace.workspace.model.AppUser;
+import dz.usthb.eclipseworkspace.team.exceptions.ValidationException;
+
+public interface ValidationStrategy {
+    boolean validate(AppUser user, Long teamId) throws ValidationException;
+}

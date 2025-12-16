@@ -1,0 +1,43 @@
+# === Java ===
+*.class
+*.log
+*.tmp
+
+# Archives / libs
+*.jar
+*.war
+*.ear
+*.zip
+
+# Dossiers de build fréquents
+bin/
+out/
+build/
+target/
+
+# === IDEs & éditeurs ===
+
+# IntelliJ / IDEA
+.idea/
+*.iml
+*.iws
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# VS Code
+.vscode/
+
+# Mac / Windows trash
+.DS_Store
+Thumbs.db
+
+# Logs divers
+logs/
+*.log
+
+# Autres fichiers temporaires
+*.swp
+*~
