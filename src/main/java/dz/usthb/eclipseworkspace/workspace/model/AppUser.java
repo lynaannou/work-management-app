@@ -35,4 +35,7 @@ public class AppUser {
     public String getPhone() { return phone; }
     public String getPasswordHash() { return passwordHash; }
     public Date getCreatedAt() { return createdAt; }
+    
+
+
 }

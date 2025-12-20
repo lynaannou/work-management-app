@@ -1,20 +1,25 @@
 package dz.usthb.eclipseworkspace.team.service;
 
-import dz.usthb.eclipseworkspace.team.dao.TeamMemberDao;
-import dz.usthb.eclipseworkspace.team.model.TeamMember;
-import dz.usthb.eclipseworkspace.team.model.PermissionRequest;
-import dz.usthb.eclipseworkspace.team.exceptions.PermissionException;
-import dz.usthb.eclipseworkspace.workspace.model.AppUser;
 import java.util.List;
+
+import dz.usthb.eclipseworkspace.team.dao.TeamMemberDao;
+import dz.usthb.eclipseworkspace.team.exceptions.PermissionException;
+import dz.usthb.eclipseworkspace.team.model.PermissionRequest;
+import dz.usthb.eclipseworkspace.team.model.TeamMember;
+import dz.usthb.eclipseworkspace.workspace.model.AppUser;
 
 public class TeamMemberService extends TeamSubject {
     private final TeamMemberDao teamMemberDao;
     private final PermissionManager permissionManager;
+    private static final int MAX_TEAM_MEMBERS = 7;
+    private static final int MAX_TASKS_PER_MEMBER = 5;
     
     public TeamMemberService(TeamMemberDao teamMemberDao) {
+        if (teamMemberDao == null) {
+            throw new IllegalArgumentException("TeamMemberDao ne peut pas être null");
+        }
         this.teamMemberDao = teamMemberDao;
         this.permissionManager = new PermissionManager(teamMemberDao);
-        
         
         addObserver(new TaskBoardObserver());
         addObserver(new CalendarObserver());
@@ -22,6 +27,12 @@ public class TeamMemberService extends TeamSubject {
     
     public TeamMemberService(TeamMemberDao teamMemberDao, 
                            PermissionManager permissionManager) {
+        if (teamMemberDao == null) {
+            throw new IllegalArgumentException("TeamMemberDao ne peut pas être null");
+        }
+        if (permissionManager == null) {
+            throw new IllegalArgumentException("PermissionManager ne peut pas être null");
+        }
         this.teamMemberDao = teamMemberDao;
         this.permissionManager = permissionManager;
         
@@ -29,38 +40,56 @@ public class TeamMemberService extends TeamSubject {
         addObserver(new CalendarObserver());
     }
     
+
+    public TeamMember createTeamWithLeader(Long teamId, AppUser creator) throws Exception {
+        validateTeamId(teamId);
+        validateAppUser(creator, "créateur");
+        
+        System.out.println(" Création d'équipe avec leader: " + creator.getUser_id());
+        
+        // Vérifier si l'utilisateur est déjà membre
+        if (teamMemberDao.exists(teamId, Long.valueOf(creator.getUser_id()))) {
+            throw new Exception("L'utilisateur est déjà membre de cette équipe");
+        }
+        
+        // Créer le LEAD
+        TeamMember leader = new TeamMember(teamId, Long.valueOf(creator.getUser_id()), "LEAD");
+        Long memberId = teamMemberDao.create(leader);
+        leader.setTeamMemberId(memberId);
+        
+        notifyMemberAdded(leader);
+        System.out.println(" Équipe créée avec le leader: " + leader);
+        return leader;
+    }
+    
     public TeamMember addMember(AppUser requester, Long teamId, Long userId, String role) 
             throws Exception {
         
-        System.out.println("➕ Tentative d'ajout du membre " + userId + " à l'équipe " + teamId);
+        validateAddMemberParameters(requester, teamId, userId, role);
         
-        // Vérification limite de membres (7 max)
+        System.out.println(" Tentative d'ajout du membre " + userId + " à l'équipe " + teamId);
+
+        // Vérifier la limite de membres
         int currentMembers = teamMemberDao.countMembersByTeam(teamId);
-        if (currentMembers >= 7) {
-            throw new Exception("L'équipe a déjà atteint le maximum de 7 membres");
+        if (currentMembers >= MAX_TEAM_MEMBERS) {
+            throw new Exception("L'équipe a déjà atteint le maximum de " + MAX_TEAM_MEMBERS + " membres");
         }
         
-        // Validation des permissions
+        // Vérifier les permissions
         PermissionRequest request = new PermissionRequest(requester, teamId, "ADD_MEMBER", userId);
         if (!permissionManager.checkPermission(request)) {
             throw new PermissionException("Permission refusée pour ajouter un membre");
         }
-        
-        // Vérification si l'utilisateur est déjà membre
+
+        // Vérifier si l'utilisateur est déjà membre
         if (teamMemberDao.exists(teamId, userId)) {
-            throw new Exception(" L'utilisateur est déjà membre de cette équipe");
+            throw new Exception("L'utilisateur est déjà membre de cette équipe");
         }
         
-        // Validation du rôle
-        if (!"LEAD".equals(role) && !"MEMBER".equals(role)) {
-            throw new Exception(" Rôle invalide. Doit être 'LEAD' ou 'MEMBER'");
-        }
-        
-        // Création et sauvegarde du membre
+        // Créer le membre
         TeamMember newMember = new TeamMember(teamId, userId, role);
         Long memberId = teamMemberDao.create(newMember);
         newMember.setTeamMemberId(memberId);
-        
         
         notifyMemberAdded(newMember);
         
@@ -69,26 +98,29 @@ public class TeamMemberService extends TeamSubject {
     }
     
     public boolean removeMember(AppUser requester, Long teamMemberId) throws Exception {
-        TeamMember memberToRemove = teamMemberDao.findById(teamMemberId)
-            .orElseThrow(() -> new Exception(" Membre non trouvé"));
+        validateAppUser(requester, "demandeur");
+        validateTeamMemberId(teamMemberId);
         
-        System.out.println("➖ Tentative de retrait du membre " + memberToRemove.getUserId());
+        TeamMember memberToRemove = teamMemberDao.findById(teamMemberId)
+            .orElseThrow(() -> new Exception("Membre non trouvé avec l'ID: " + teamMemberId));
+        
+        System.out.println("Tentative de retrait du membre " + memberToRemove.getUserId());
         
         PermissionRequest request = new PermissionRequest(
             requester, memberToRemove.getTeamId(), "DELETE_MEMBER", memberToRemove.getUserId());
         
         if (!permissionManager.checkPermission(request)) {
-            throw new PermissionException(" Permission refusée pour supprimer un membre");
+            throw new PermissionException("Permission refusée pour supprimer un membre");
         }
-        
-        // Empêcher la suppression du dernier LEAD
+
+        // Vérifier qu'on ne supprime pas le dernier LEAD
         if ("LEAD".equals(memberToRemove.getRole())) {
             List<TeamMember> teamMembers = teamMemberDao.findByTeamId(memberToRemove.getTeamId());
             long leadCount = teamMembers.stream()
                 .filter(m -> "LEAD".equals(m.getRole()))
                 .count();
             if (leadCount <= 1) {
-                throw new Exception(" Impossible de supprimer le dernier LEAD de l'équipe");
+                throw new Exception("Impossible de supprimer le dernier LEAD de l'équipe");
             }
         }
         
@@ -96,16 +128,27 @@ public class TeamMemberService extends TeamSubject {
         if (success) {
             notifyMemberRemoved(memberToRemove);
             System.out.println(" Membre retiré avec succès: " + memberToRemove);
+        } else {
+            System.out.println(" Échec de la suppression du membre");
         }
         
         return success;
     }
     
     public boolean updateMemberRole(AppUser requester, Long teamMemberId, String newRole) throws Exception {
+        validateAppUser(requester, "demandeur");
+        validateTeamMemberId(teamMemberId);
+        validateRole(newRole);
+        
         TeamMember member = teamMemberDao.findById(teamMemberId)
-            .orElseThrow(() -> new Exception("Membre non trouvé"));
+            .orElseThrow(() -> new Exception("Membre non trouvé avec l'ID: " + teamMemberId));
         
         String oldRole = member.getRole();
+
+        if (oldRole.equals(newRole)) {
+            System.out.println("Le rôle est déjà " + newRole + ". Aucun changement nécessaire.");
+            return true;
+        }
         
         System.out.println(" Tentative de changement de rôle de " + oldRole + " à " + newRole);
         
@@ -114,11 +157,7 @@ public class TeamMemberService extends TeamSubject {
         request.setNewRole(newRole);
         
         if (!permissionManager.checkPermission(request)) {
-            throw new PermissionException(" Permission refusée pour changer le rôle");
-        }
-        
-        if (!"LEAD".equals(newRole) && !"MEMBER".equals(newRole)) {
-            throw new Exception(" Rôle invalide. Doit être 'LEAD' ou 'MEMBER'");
+            throw new PermissionException("Permission refusée pour changer le rôle");
         }
         
         boolean success = teamMemberDao.updateRole(teamMemberId, newRole);
@@ -126,39 +165,92 @@ public class TeamMemberService extends TeamSubject {
             member.setRole(newRole);
             notifyMemberRoleChanged(member, oldRole);
             System.out.println(" Rôle changé avec succès");
+        } else {
+            System.out.println(" Échec du changement de rôle");
         }
         
         return success;
     }
     
-    // Les autres méthodes
+
     public List<TeamMember> getTeamMembers(Long teamId) throws Exception {
+        validateTeamId(teamId);
         return teamMemberDao.findByTeamId(teamId);
     }
     
     public boolean isUserMemberOfTeam(Long userId, Long teamId) throws Exception {
+        validateUserId(userId);
+        validateTeamId(teamId);
         return teamMemberDao.findByTeamAndUser(teamId, userId).isPresent();
     }
     
     public List<TeamMember> getOverloadedMembers(Long teamId) throws Exception {
+        validateTeamId(teamId);
         return teamMemberDao.findOverloadedMembers(teamId);
     }
     
     public TeamMember getTeamMemberByUser(Long teamId, Long userId) throws Exception {
+        validateTeamId(teamId);
+        validateUserId(userId);
         return teamMemberDao.findByTeamAndUser(teamId, userId)
             .orElseThrow(() -> new Exception("Utilisateur non membre de cette équipe"));
     }
     
     public boolean canAssignTaskToMember(Long teamId, Long userId) throws Exception {
+        validateTeamId(teamId);
+        validateUserId(userId);
+        
         TeamMember member = teamMemberDao.findByTeamAndUser(teamId, userId)
             .orElseThrow(() -> new Exception("Membre non trouvé dans l'équipe"));
         
-        return member.getTaskCount() < 5;
+        return member.getTaskCount() == null || member.getTaskCount() < MAX_TASKS_PER_MEMBER;
     }
     
     public int getMemberTaskCount(Long teamMemberId) throws Exception {
+        validateTeamMemberId(teamMemberId);
+        
         TeamMember member = teamMemberDao.findById(teamMemberId)
             .orElseThrow(() -> new Exception("Membre non trouvé"));
         return member.getTaskCount() != null ? member.getTaskCount() : 0;
+    }
+    
+    private void validateTeamId(Long teamId) {
+        if (teamId == null || teamId <= 0) {
+            throw new IllegalArgumentException("ID d'équipe invalide");
+        }
+    }
+    
+    private void validateUserId(Long userId) {
+        if (userId == null || userId <= 0) {
+            throw new IllegalArgumentException("ID utilisateur invalide");
+        }
+    }
+    
+    private void validateTeamMemberId(Long teamMemberId) {
+        if (teamMemberId == null || teamMemberId <= 0) {
+            throw new IllegalArgumentException("ID de membre d'équipe invalide");
+        }
+    }
+    
+    private void validateAppUser(AppUser user, String context) {
+        if (user == null) {
+            throw new IllegalArgumentException("L'utilisateur (" + context + ") ne peut pas être null");
+        }
+        if (user.getUser_id() <= 0) {
+            throw new IllegalArgumentException("L'ID utilisateur (" + context + ") doit être positif");
+        }
+    }
+    
+    private void validateRole(String role) {
+        if (role == null || (!"LEAD".equals(role) && !"MEMBER".equals(role))) {
+            throw new IllegalArgumentException("Rôle invalide. Doit être 'LEAD' ou 'MEMBER'");
+        }
+    }
+    
+    private void validateAddMemberParameters(AppUser requester, Long teamId, Long userId, String role) {
+        validateAppUser(requester, "demandeur");
+        validateTeamId(teamId);
+        validateUserId(userId);
+        validateRole(role);
     }
 }

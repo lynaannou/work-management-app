@@ -1,10 +1,11 @@
 package dz.usthb.eclipseworkspace.team.service;
 
-import dz.usthb.eclipseworkspace.team.model.TeamMember;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TeamSubject {
+import dz.usthb.eclipseworkspace.team.model.TeamMember;
+
+public abstract class TeamSubject {
     private final List<TeamObserver> observers = new ArrayList<>();
     
     public void addObserver(TeamObserver observer) {

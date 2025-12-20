@@ -1,11 +1,11 @@
 package dz.usthb.eclipseworkspace.team.service;
 
-import dz.usthb.eclipseworkspace.team.dao.TeamMemberDao;
-import dz.usthb.eclipseworkspace.team.model.TeamMember;
-import dz.usthb.eclipseworkspace.team.model.PermissionRequest;
-import dz.usthb.eclipseworkspace.team.exceptions.PermissionException;
-import dz.usthb.eclipseworkspace.workspace.model.AppUser;
 import java.util.Optional;
+
+import dz.usthb.eclipseworkspace.team.dao.TeamMemberDao;
+import dz.usthb.eclipseworkspace.team.exceptions.PermissionException;
+import dz.usthb.eclipseworkspace.team.model.PermissionRequest;
+import dz.usthb.eclipseworkspace.team.model.TeamMember;
 
 public class PermissionManager {
     private final TeamMemberDao teamMemberDao;
@@ -17,7 +17,7 @@ public class PermissionManager {
     public boolean checkPermission(PermissionRequest request) throws PermissionException {
         if ("DELETE_MEMBER".equals(request.getAction()) && 
             request.getRequester().getUser_id() == request.getTargetUserId()) {
-            throw new PermissionException("❌ Un utilisateur ne peut pas se retirer lui-même de l'équipe");
+            throw new PermissionException("Un utilisateur ne peut pas se retirer lui-même de l'équipe");
         }
         
         return checkLeadPermissions(request);
@@ -31,28 +31,30 @@ public class PermissionManager {
             boolean isLead = requesterMember.isPresent() && "LEAD".equals(requesterMember.get().getRole());
             
             if (isLead) {
-                System.out.println("✅ PermissionManager: LEAD autorisé pour " + request.getAction());
+                System.out.println("PermissionManager: LEAD autorisé pour " + request.getAction());
                 return true;
             }
             
             switch (request.getAction()) {
                 case "ADD_MEMBER":
-                    throw new PermissionException(" Seul le LEAD peut ajouter des membres à l'équipe");
+                    throw new PermissionException("Seul le LEAD peut ajouter des membres à l'équipe");
                     
                 case "CHANGE_ROLE":
-                    if ("LEAD".equals(request.getNewRole())) {
-                        throw new PermissionException(" Seul un LEAD peut attribuer le rôle LEAD");
-                    }
+                    // Vérifier si c'est l'utilisateur lui-même
                     if (request.getRequester().getUser_id() == request.getTargetUserId()) {
-                        return "MEMBER".equals(request.getNewRole());
+                        // Un membre peut se rétrograder lui-même en MEMBER
+                        if ("MEMBER".equals(request.getNewRole())) {
+                            return true;
+                        }
+                        throw new PermissionException("Un membre ne peut pas se promouvoir lui-même en LEAD");
                     }
-                    throw new PermissionException(" Permission insuffisante pour changer le rôle d'un autre membre");
+                    throw new PermissionException("Seul le LEAD peut changer le rôle d'un autre membre");
                     
                 case "DELETE_MEMBER":
-                    throw new PermissionException(" Seul le LEAD peut supprimer des membres");
+                    throw new PermissionException("Seul le LEAD peut supprimer des membres");
                     
                 default:
-                    throw new PermissionException(" Action non autorisée: " + request.getAction());
+                    throw new PermissionException("Action non autorisée: " + request.getAction());
             }
             
         } catch (Exception e) {
