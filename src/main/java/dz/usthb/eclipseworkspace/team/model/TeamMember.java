@@ -2,7 +2,7 @@ package dz.usthb.eclipseworkspace.team.model;
 
 import java.sql.Date;
 
-public class TeamMember {
+public final class TeamMember {
     private Long teamMemberId;
     private Long teamId;
     private Long userId;
@@ -13,7 +13,6 @@ public class TeamMember {
     public TeamMember() {}
     
     public TeamMember(Long teamId, Long userId, String role) {
-        // IMPORTANT : Ces validations doivent être présentes
         setTeamId(teamId);
         setUserId(userId);
         setRole(role);

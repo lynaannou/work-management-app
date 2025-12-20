@@ -1,6 +1,7 @@
 package dz.usthb.eclipseworkspace.team.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import dz.usthb.eclipseworkspace.team.dao.TeamMemberDao;
 import dz.usthb.eclipseworkspace.team.exceptions.PermissionException;
@@ -47,12 +48,10 @@ public class TeamMemberService extends TeamSubject {
         
         System.out.println(" Création d'équipe avec leader: " + creator.getUser_id());
         
-        // Vérifier si l'utilisateur est déjà membre
         if (teamMemberDao.exists(teamId, Long.valueOf(creator.getUser_id()))) {
             throw new Exception("L'utilisateur est déjà membre de cette équipe");
         }
         
-        // Créer le LEAD
         TeamMember leader = new TeamMember(teamId, Long.valueOf(creator.getUser_id()), "LEAD");
         Long memberId = teamMemberDao.create(leader);
         leader.setTeamMemberId(memberId);
@@ -69,24 +68,20 @@ public class TeamMemberService extends TeamSubject {
         
         System.out.println(" Tentative d'ajout du membre " + userId + " à l'équipe " + teamId);
 
-        // Vérifier la limite de membres
         int currentMembers = teamMemberDao.countMembersByTeam(teamId);
         if (currentMembers >= MAX_TEAM_MEMBERS) {
             throw new Exception("L'équipe a déjà atteint le maximum de " + MAX_TEAM_MEMBERS + " membres");
         }
         
-        // Vérifier les permissions
         PermissionRequest request = new PermissionRequest(requester, teamId, "ADD_MEMBER", userId);
         if (!permissionManager.checkPermission(request)) {
             throw new PermissionException("Permission refusée pour ajouter un membre");
         }
 
-        // Vérifier si l'utilisateur est déjà membre
         if (teamMemberDao.exists(teamId, userId)) {
             throw new Exception("L'utilisateur est déjà membre de cette équipe");
         }
         
-        // Créer le membre
         TeamMember newMember = new TeamMember(teamId, userId, role);
         Long memberId = teamMemberDao.create(newMember);
         newMember.setTeamMemberId(memberId);
@@ -113,7 +108,6 @@ public class TeamMemberService extends TeamSubject {
             throw new PermissionException("Permission refusée pour supprimer un membre");
         }
 
-        // Vérifier qu'on ne supprime pas le dernier LEAD
         if ("LEAD".equals(memberToRemove.getRole())) {
             List<TeamMember> teamMembers = teamMemberDao.findByTeamId(memberToRemove.getTeamId());
             long leadCount = teamMembers.stream()
@@ -211,7 +205,7 @@ public class TeamMemberService extends TeamSubject {
         
         TeamMember member = teamMemberDao.findById(teamMemberId)
             .orElseThrow(() -> new Exception("Membre non trouvé"));
-        return member.getTaskCount() != null ? member.getTaskCount() : 0;
+      return Optional.ofNullable(member.getTaskCount()).orElse(0);
     }
     
     private void validateTeamId(Long teamId) {

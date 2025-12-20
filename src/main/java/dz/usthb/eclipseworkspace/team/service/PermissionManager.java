@@ -36,30 +36,26 @@ public class PermissionManager {
             }
             
             switch (request.getAction()) {
-                case "ADD_MEMBER":
-                    throw new PermissionException("Seul le LEAD peut ajouter des membres à l'équipe");
+                case "ADD_MEMBER" -> throw new PermissionException("Seul le LEAD peut ajouter des membres à l'équipe");
                     
-                case "CHANGE_ROLE":
-                    // Vérifier si c'est l'utilisateur lui-même
+                case "CHANGE_ROLE" -> {
                     if (request.getRequester().getUser_id() == request.getTargetUserId()) {
-                        // Un membre peut se rétrograder lui-même en MEMBER
                         if ("MEMBER".equals(request.getNewRole())) {
                             return true;
                         }
                         throw new PermissionException("Un membre ne peut pas se promouvoir lui-même en LEAD");
                     }
                     throw new PermissionException("Seul le LEAD peut changer le rôle d'un autre membre");
+                }
                     
-                case "DELETE_MEMBER":
-                    throw new PermissionException("Seul le LEAD peut supprimer des membres");
+                case "DELETE_MEMBER" -> throw new PermissionException("Seul le LEAD peut supprimer des membres");
                     
-                default:
-                    throw new PermissionException("Action non autorisée: " + request.getAction());
+                default -> throw new PermissionException("Action non autorisée: " + request.getAction());
             }
             
         } catch (Exception e) {
-            if (e instanceof PermissionException) {
-                throw (PermissionException) e;
+            if (e instanceof PermissionException permissionException) {
+                throw permissionException;
             }
             throw new PermissionException("Erreur de vérification des permissions: " + e.getMessage(), e);
         }

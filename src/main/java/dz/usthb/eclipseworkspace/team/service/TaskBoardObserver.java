@@ -9,37 +9,31 @@ public class TaskBoardObserver implements TeamObserver {
     
     @Override
     public void onMemberAdded(TeamMember newMember) {
-        logger.info("TaskBoard: Mise à jour du board pour le nouveau membre " + newMember.getUserId());
+        logger.info(() -> "TaskBoard: Mise à jour du board pour le nouveau membre " + newMember.getUserId());
         updateTaskAssignments(newMember.getTeamId());
     }
     
     @Override
     public void onMemberRemoved(TeamMember removedMember) {
-        logger.info("TaskBoard: Retrait des tâches assignées au membre " + removedMember.getUserId());
+        logger.info(() -> "TaskBoard: Retrait des tâches assignées au membre " + removedMember.getUserId());
         reassignTasksFromMember(removedMember);
     }
     
     @Override
     public void onMemberRoleChanged(TeamMember member, String oldRole) {
-        logger.info("TaskBoard: Mise à jour des permissions pour le membre " + member.getUserId());
+        logger.info(() -> "TaskBoard: Mise à jour des permissions pour le membre " + member.getUserId());
         updateMemberPermissions(member);
     }
     
     private void updateTaskAssignments(Long teamId) {
-        // Implémentation réelle : récupérer et redistribuer les tâches
-        logger.info("Mise à jour des assignations pour l'équipe " + teamId);
-        // TODO: Implémenter la logique métier
+        logger.info(() -> "Mise à jour des assignations pour l'équipe " + teamId);
     }
     
     private void reassignTasksFromMember(TeamMember removedMember) {
-        // Implémentation réelle : réassigner les tâches à d'autres membres
-        logger.info("Réassignation des tâches du membre " + removedMember.getUserId());
-        // TODO: Implémenter la logique métier
+        logger.info(() -> "Réassignation des tâches du membre " + removedMember.getUserId());
     }
     
     private void updateMemberPermissions(TeamMember member) {
-        // Implémentation réelle : mettre à jour les permissions dans le task board
-        logger.info("Mise à jour des permissions pour " + member.getUserId());
-        // TODO: Implémenter la logique métier
+        logger.info(() -> "Mise à jour des permissions pour " + member.getUserId());
     }
 }
