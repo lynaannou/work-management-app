@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bridge Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-box {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-left: 3px solid #007bff;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+    </style>
+</head>
+<body>
+<h1>JavaFX Bridge Test Page</h1>
+
+<div class="test-box">
+    <h2>Test 1: Check if bridge exists</h2>
+    <button onclick="testBridgeExists()">Test Bridge</button>
+    <div id="result1" class="result"></div>
+</div>
+
+<div class="test-box">
+    <h2>Test 2: Call test() method</h2>
+    <button onclick="testMethod()">Call test()</button>
+    <div id="result2" class="result"></div>
+</div>
+
+<div class="test-box">
+    <h2>Test 3: Check available methods</h2>
+    <button onclick="listMethods()">List Methods</button>
+    <div id="result3" class="result"></div>
+</div>
+
+<div class="test-box">
+    <h2>Test 4: Call login (with test credentials)</h2>
+    <button onclick="testLogin()">Test Login</button>
+    <div id="result4" class="result"></div>
+</div>
+
+<div class="test-box">
+    <h2>Test 5: Call register (with test data)</h2>
+    <button onclick="testRegister()">Test Register</button>
+    <div id="result5" class="result"></div>
+</div>
+
+<script>
+    function testBridgeExists() {
+        const result = document.getElementById('result1');
+        try {
+            if (typeof window.javaAuth !== 'undefined') {
+                result.className = 'result success';
+                result.innerHTML = '✓ Bridge exists! Type: ' + typeof window.javaAuth;
+            } else {
+                result.className = 'result error';
+                result.innerHTML = '✗ Bridge does NOT exist';
+            }
+        } catch (e) {
+            result.className = 'result error';
+            result.innerHTML = '✗ Error: ' + e.message;
+        }
+    }
+
+    function testMethod() {
+        const result = document.getElementById('result2');
+        try {
+            if (typeof window.javaAuth === 'undefined') {
+                result.className = 'result error';
+                result.innerHTML = '✗ Bridge not found';
+                return;
+            }
+
+            if (typeof window.javaAuth.test === 'function') {
+                const response = window.javaAuth.test();
+                result.className = 'result success';
+                result.innerHTML = '✓ test() returned: ' + response;
+            } else {
+                result.className = 'result error';
+                result.innerHTML = '✗ test() method not found. Type: ' + typeof window.javaAuth.test;
+            }
+        } catch (e) {
+            result.className = 'result error';
+            result.innerHTML = '✗ Error: ' + e.message;
+        }
+    }
+
+    function listMethods() {
+        const result = document.getElementById('result3');
+        try {
+            if (typeof window.javaAuth === 'undefined') {
+                result.className = 'result error';
+                result.innerHTML = '✗ Bridge not found';
+                return;
+            }
+
+            const methods = [];
+            for (let key in window.javaAuth) {
+                methods.push(key + ' (' + typeof window.javaAuth[key] + ')');
+            }
+
+            result.className = 'result success';
+            result.innerHTML = '✓ Available properties/methods:<br>' + methods.join('<br>');
+        } catch (e) {
+            result.className = 'result error';
+            result.innerHTML = '✗ Error: ' + e.message;
+        }
+    }
+
+    function testLogin() {
+        const result = document.getElementById('result4');
+        try {
+            if (typeof window.javaAuth === 'undefined') {
+                result.className = 'result error';
+                result.innerHTML = '✗ Bridge not found';
+                return;
+            }
+
+            if (typeof window.javaAuth.login !== 'function') {
+                result.className = 'result error';
+                result.innerHTML = '✗ login() method not found. Type: ' + typeof window.javaAuth.login;
+                return;
+            }
+
+            console.log('Calling login...');
+            const response = window.javaAuth.login('test@example.com', 'password123');
+            console.log('Login response:', response);
+
+            if (response === 'SUCCESS') {
+                result.className = 'result success';
+                result.innerHTML = '✓ login() returned: ' + response;
+            } else {
+                result.className = 'result';
+                result.innerHTML = 'login() returned: ' + response;
+            }
+        } catch (e) {
+            result.className = 'result error';
+            result.innerHTML = '✗ Error: ' + e.message;
+            console.error('Login error:', e);
+        }
+    }
+
+    function testRegister() {
+        const result = document.getElementById('result5');
+        try {
+            if (typeof window.javaAuth === 'undefined') {
+                result.className = 'result error';
+                result.innerHTML = '✗ Bridge not found';
+                return;
+            }
+
+            if (typeof window.javaAuth.register !== 'function') {
+                result.className = 'result error';
+                result.innerHTML = '✗ register() method not found. Type: ' + typeof window.javaAuth.register;
+                return;
+            }
+
+            console.log('Calling register...');
+            const response = window.javaAuth.register('test@example.com', 'Test', 'User', 'password123');
+            console.log('Register response:', response);
+
+            if (response === 'SUCCESS') {
+                result.className = 'result success';
+                result.innerHTML = '✓ register() returned: ' + response;
+            } else {
+                result.className = 'result';
+                result.innerHTML = 'register() returned: ' + response;
+            }
+        } catch (e) {
+            result.className = 'result error';
+            result.innerHTML = '✗ Error: ' + e.message;
+            console.error('Register error:', e);
+        }
+    }
+
+    // Run initial test on load
+    window.addEventListener('load', function() {
+        console.log('Page loaded');
+        console.log('Bridge exists:', typeof window.javaAuth !== 'undefined');
+        testBridgeExists();
+    });
+</script>
+</body>
+</html>

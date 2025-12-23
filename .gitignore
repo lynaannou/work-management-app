@@ -43,4 +43,4 @@ logs/
 *~
 
 # Ignore environment variables file
-.env
+src/main/resources/.env
