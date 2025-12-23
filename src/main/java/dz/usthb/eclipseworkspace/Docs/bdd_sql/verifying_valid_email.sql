@@ -1,19 +1,27 @@
-CREATE OR REPLACE FUNCTION email_valid
-()
+CREATE OR REPLACE FUNCTION email_valid()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF :NEW.email is NOT NULL THEN
-        IF NOT (:NEW.email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$') THEN
-            RAISE EXCEPTION 'Invalid email format: %', :NEW.email;
+    -- Check not null
+    IF NEW.email IS NOT NULL THEN
+
+        -- General email format check
+        IF NEW.email !~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$' THEN
+            RAISE EXCEPTION 'Invalid email format: %', NEW.email;
         END IF;
-        IF NOT (:NEW.email ~* '^[^@]+@usthb\.dz$') OR NOT (:NEW.email ~* '^[^@]+@gmail\.com$') OR NOT (:NEW.email ~* '^[^@]+@yahoo\.fr$') OR NOT (:NEW.email ~* '^[^@]+@hotmail\.com$') OR NOT (:NEW.email ~* '^[^@]+@outlook\.com$') THEN
-            RAISE EXCEPTION 'Email must belong to usthb.dz domain: %', :NEW.email;
+
+        -- Allowed domains only
+        IF NOT (
+            NEW.email ~* '^[^@]+@usthb\.dz$' OR
+            NEW.email ~* '^[^@]+@gmail\.com$' OR
+            NEW.email ~* '^[^@]+@yahoo\.fr$' OR
+            NEW.email ~* '^[^@]+@hotmail\.com$' OR
+            NEW.email ~* '^[^@]+@outlook\.com$'
+        ) THEN
+            RAISE EXCEPTION 'Email domain not allowed: %', NEW.email;
         END IF;
+
     END IF;
+
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE TRIGGER trg_email_valid
-BEFORE INSERT OR UPDATE ON app_user
-FOR EACH ROW
-EXECUTE FUNCTION email_valid();

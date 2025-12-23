@@ -1,6 +1,8 @@
 package dz.usthb.eclipseworkspace.team.dao;
 
 import dz.usthb.eclipseworkspace.team.model.TeamMember;
+
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,4 +17,8 @@ public interface TeamMemberDao {
     Optional<TeamMember> findByTeamAndUser(Long teamId, Long userId) throws Exception;
     int countMembersByTeam(Long teamId) throws Exception;
     List<TeamMember> findOverloadedMembers(Long teamId) throws Exception;
+
+    String getRoleByUserId(Long userId) throws SQLException;
+
+
 }

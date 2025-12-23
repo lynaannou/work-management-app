@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EclipseWork - Authentication</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="register.css">
+</head>
+<body>
+<!-- Register Form -->
+<div id="register-form" class="form-container">
+  <div class="form-card">
+    <h1 class="form-title">CREATE ACCOUNT</h1>
+
+    <form id="registerForm">
+      <div class="form-group">
+        <label for="firstName">FULL NAME</label>
+        <input type="text" id="firstName" placeholder="NAME" required>
+      </div>
+
+      <div class="form-group">
+        <label for="lastName">FULL NAME</label>
+        <input type="text" id="lastName" placeholder="NAME" required>
+      </div>
+
+      <div class="form-group">
+        <label for="register-email">EMAIL ADDRESS</label>
+        <input type="email" id="register-email" placeholder="EMAILADDRESS@ECOWORK.COM" required>
+      </div>
+
+
+
+      <div class="form-group">
+        <label for="register-password">PASSWORD</label>
+        <div class="password-wrapper">
+          <input type="password" id="register-password" placeholder="PASSWORD" required>
+          <button type="button" class="toggle-password" data-target="register-password">
+            <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="register-confirm-password">CONFIRM PASSWORD</label>
+        <div class="password-wrapper">
+          <input type="password" id="register-confirm-password" placeholder="PASSWORD" required>
+          <button type="button" class="toggle-password" data-target="register-confirm-password">
+            <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn">CREATE ACCOUNT</button>
+      <p class="toggle-form-text">
+        ALREADY HAVE AN ACCOUNT? <a href="#" id="show-login">SIGN IN</a>
+      </p>
+    </form>
+  </div>
+
+  <div class="branding">ECLIPSEWORK</div>
+</div>
+
+<!-- Login Form -->
+<div id="login-form" class="form-container" style="display: none;">
+  <div class="form-card">
+    <h1 class="form-title">SIGN IN</h1>
+
+    <form id="loginForm">
+
+      <div class="form-group">
+        <label for="login-email">EMAIL ADDRESS</label>
+        <input type="email" id="login-email" placeholder="EMAILADDRESS@ECOWORK.COM" required>
+      </div>
+
+      <div class="form-group">
+        <label for="login-password">PASSWORD</label>
+        <div class="password-wrapper">
+          <input type="password" id="login-password" placeholder="PASSWORD" required>
+          <button type="button" class="toggle-password" data-target="login-password">
+            <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn">SIGN IN</button>
+      <p class="toggle-form-text">
+        DON'T HAVE AN ACCOUNT? <a href="#" id="show-register">SIGN UP</a>
+      </p>
+    </form>
+  </div>
+
+  <div class="branding">ECLIPSEWORK</div>
+</div>
+
+<script src="register.js"></script>
+</body>
+</html>

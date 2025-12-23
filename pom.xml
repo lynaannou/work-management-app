@@ -74,6 +74,21 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- jBCrypt library for hashing and verifying passwords(bcrypt) -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
+
+        <!--read environment variables-->
+        <dependency>
+            <groupId>io.github.cdimascio</groupId>
+            <artifactId>java-dotenv</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
@@ -85,7 +100,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>dz.usthb.eclipseworkspace.WorkspaceApp</mainClass>
+                    <mainClass>dz.usthb.eclipseworkspace.user.controller.test</mainClass>
                 </configuration>
             </plugin>
 

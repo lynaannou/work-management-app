@@ -8,5 +8,5 @@ CREATE TABLE app_user (
   password_hash  TEXT NOT NULL,
   created_at     DATE NOT NULL DEFAULT CURRENT_DATE
 );
-//* HERES THE ACCOUNT I USED TO TEST:*//
+
 INSERT INTO app_user(email, first_name, last_name, phone, password_hash, created_at) VALUES ('lynaannou@gmail.com', 'Lyna', 'Annou', 06789999, 'passwording to test');

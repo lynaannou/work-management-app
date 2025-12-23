@@ -7,6 +7,7 @@ import dz.usthb.eclipseworkspace.team.dao.TeamMemberDao;
 import dz.usthb.eclipseworkspace.team.exceptions.PermissionException;
 import dz.usthb.eclipseworkspace.team.model.PermissionRequest;
 import dz.usthb.eclipseworkspace.team.model.TeamMember;
+import dz.usthb.eclipseworkspace.user.util.UserRole;
 import dz.usthb.eclipseworkspace.workspace.model.AppUser;
 
 public class TeamMemberService extends TeamSubject {
@@ -239,6 +240,17 @@ public class TeamMemberService extends TeamSubject {
         if (role == null || (!"LEAD".equals(role) && !"MEMBER".equals(role))) {
             throw new IllegalArgumentException("Rôle invalide. Doit être 'LEAD' ou 'MEMBER'");
         }
+    }
+
+    public UserRole getUserRole(Long userId) throws Exception {
+        // For simplicity, just get the first team membership role, default to MEMBER
+        List<TeamMember> memberships = teamMemberDao.findByUserId(userId);
+        if (memberships.isEmpty()) {
+            return UserRole.MEMBER;
+        }
+        // Assume first membership is main role (adjust if needed)
+        String roleStr = memberships.get(0).getRole();
+        return roleStr != null ? UserRole.valueOf(roleStr.toUpperCase()) : UserRole.MEMBER;
     }
     
     private void validateAddMemberParameters(AppUser requester, Long teamId, Long userId, String role) {

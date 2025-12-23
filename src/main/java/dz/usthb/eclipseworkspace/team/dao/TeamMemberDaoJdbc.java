@@ -210,6 +210,26 @@ public class TeamMemberDaoJdbc implements TeamMemberDao {
         }
         return overloaded;
     }
+
+    @Override
+    public String getRoleByUserId(Long userId) throws SQLException {
+        String role = null;
+        String sql = "SELECT role FROM team_member WHERE user_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setLong(1, userId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    role = rs.getString("role");
+                }
+            }
+        }
+
+        return role; // returns null if user is not a member of any team
+    }
     
     private TeamMember mapResultSetToTeamMember(ResultSet rs) throws SQLException {
         TeamMember member = new TeamMember();

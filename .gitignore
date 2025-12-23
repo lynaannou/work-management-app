@@ -41,3 +41,6 @@ logs/
 # Autres fichiers temporaires
 *.swp
 *~
+
+# Ignore environment variables file
+.env
