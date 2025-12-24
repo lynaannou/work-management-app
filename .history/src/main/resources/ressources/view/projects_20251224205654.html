@@ -52,12 +52,6 @@
 
 <script>
 function loadProjects(data) {
-  if (data.length > 0 && data[0].leader) {
-  const leader = data[0].leader;
-  document.querySelector(".user-name").textContent =
-    leader.firstName + " " + leader.lastName;
-}
-
   const tbody = document.querySelector("#projectsTable tbody");
   tbody.innerHTML = "";
 

@@ -39,24 +39,14 @@ public class WorkspaceApp extends Application {
 
     @Override
     public void start(Stage stage) {
-        Connection connection;
 
-          try {
-        System.out.println("🔌 Attempting DB connection...");
-        connection = DBConnection.getConnection();
-        System.out.println("✅ DB connection OK");
-
-    } catch (Exception e) {
-        System.err.println("❌ DATABASE CONNECTION FAILED");
-        e.printStackTrace();
-        return; // STOP APP if DB fails
-    }
+        Connection connection = DBConnection.getConnection();
 
         WorkspaceService workspaceService =
                 new WorkspaceService(
-                        new DaoWorkspace(),
-                        new DaoTask(),
-                        new DaoAppUser(),
+                        new DaoWorkspace(connection),
+                        new DaoTask(connection),
+                        new DaoAppUser(connection),
                         new WorkspaceDashboardDirector(),
                         new WorkspaceDashboardBuilder()
                 );

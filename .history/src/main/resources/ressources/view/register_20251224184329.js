@@ -129,7 +129,7 @@ function login() {
         console.log("Login result:", result);
 
         if (result === "SUCCESS") {
-            window.javaBridge.navigateTo("projects.html");
+            window.javaBridge.navigateTo("workspace.html");
             return;
         }
 
