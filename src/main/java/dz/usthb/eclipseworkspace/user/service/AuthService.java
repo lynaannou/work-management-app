@@ -36,15 +36,38 @@ public class AuthService {
     public String login(String email, String password) throws SQLException, Exception {
         User user = loginStrategy.login(email, password); // throws AuthenticationException if invalid
 
+        // ✅ CRITICAL FIX: Verify userId is not null
+        if (user == null) {
+            throw new AuthenticationException("Login failed: User object is null");
+        }
+
+        if (user.getUserId() == null) {
+            System.err.println("❌ CRITICAL ERROR: user.getUserId() is NULL after login!");
+            System.err.println("User email: " + user.getEmail());
+            System.err.println("User object: " + user);
+            throw new AuthenticationException("Login failed: User ID is null. User may not exist in database.");
+        }
+
+        System.out.println("✅ User authenticated: ID = " + user.getUserId() + ", Email = " + user.getEmail());
+
         // create session token (UUID)
         String token = UUID.randomUUID().toString();
 
         // Get role ("LEAD" or "MEMBER")
-        UserRole role = teamMemberService.getUserRole(user.getUserId());
+        // ✅ FIX: Handle case where user is not in any team yet
+        UserRole role;
+        try {
+            role = teamMemberService.getUserRole(user.getUserId());
+            System.out.println("✅ User role retrieved: " + role);
+        } catch (Exception e) {
+            System.out.println("⚠️ User not in any team yet, defaulting to MEMBER role");
+            role = UserRole.MEMBER;
+        }
 
         // save session
-        Session.getInstance().setUser(user, token,role);
+        Session.getInstance().setUser(user, token, role);
 
+        System.out.println("✅ Session created successfully");
         return token; // return token to caller (frontend/JavaFX)
     }
 
@@ -63,16 +86,28 @@ public class AuthService {
         if (userDao.findByEmail(email).isPresent()) {
             throw new IllegalArgumentException("Email already in use");
         }
+
         // normalize email
-        user.setEmail(user.getEmail().trim().toLowerCase());
+        user.setEmail(email);
 
         // hash password
         String hashedPassword = hashStrategy.hashPassword(plainPassword);
         user.setPasswordHash(hashedPassword);
 
-        // save user
+        // save user - THIS SHOULD SET THE userId ON THE USER OBJECT
         userDao.create(user);
 
+        // ✅ VERIFY userId was set after creation
+        if (user.getUserId() == null) {
+            System.err.println("❌ WARNING: UserDao.create() did not set userId on User object!");
+            // Try to fetch the user to get the ID
+            User fetchedUser = userDao.findByEmail(email)
+                    .orElseThrow(() -> new SQLException("User was created but cannot be found"));
+            user.setUserId(fetchedUser.getUserId());
+            System.out.println("✅ Retrieved userId from database: " + user.getUserId());
+        }
+
+        System.out.println("✅ User registered successfully: ID = " + user.getUserId());
         return user;
     }
 
@@ -100,4 +135,3 @@ public class AuthService {
     }
 
 }
-

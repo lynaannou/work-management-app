@@ -27,7 +27,7 @@ public class EmailPasswordLogin implements LoginStrategy{
         if (!valid) {
             throw new AuthenticationException("Invalid email or password");
         }
-
+        System.out.println("DEBUG userId = " + user.getUserId());
         return user;
     }
 }

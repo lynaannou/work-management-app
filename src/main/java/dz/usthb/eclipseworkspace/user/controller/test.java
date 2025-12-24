@@ -3,9 +3,9 @@ package dz.usthb.eclipseworkspace.user.controller;
 import dz.usthb.eclipseworkspace.team.dao.TeamMemberDao;
 import dz.usthb.eclipseworkspace.team.dao.TeamMemberDaoJdbc;
 import dz.usthb.eclipseworkspace.team.service.TeamMemberService;
-import dz.usthb.eclipseworkspace.user.controller.LoginController;
 import dz.usthb.eclipseworkspace.user.dao.UserDao;
 import dz.usthb.eclipseworkspace.user.service.AuthService;
+import dz.usthb.eclipseworkspace.user.service.UserService;
 import dz.usthb.eclipseworkspace.user.util.BCryptHashStrategy;
 import dz.usthb.eclipseworkspace.user.util.EmailPasswordLogin;
 import dz.usthb.eclipseworkspace.user.util.PasswordHashStrategy;
@@ -37,7 +37,7 @@ public class test extends Application {
         AuthService authService = new AuthService(userDao, hashStrategy, loginStrategy, teamMemberService);
 
         // ---- Controller ----
-        new LoginController(webView, authService);
+        new MainController(webView, authService,new UserService(userDao,hashStrategy));
 
         // ---- Scene ----
         BorderPane root = new BorderPane(webView);

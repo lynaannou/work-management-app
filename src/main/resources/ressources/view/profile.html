@@ -3,91 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - ECLIPSEWORK</title>
-    <link rel="stylesheet" href="register.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Profile Settings - ECLIPSEWORK</title>
+    <link rel="stylesheet" href="profile.css">
 </head>
 <body>
-<nav class="navbar">
-    <div class="nav-content">
-        <div class="logo">ECLIPSEWORK</div>
-        <div class="nav-links">
-            <a href="home.html">Home</a>
-            <a href="profile.html" class="active">Profile</a>
-            <button id="logoutBtn" class="logout-btn">Logout</button>
+<div class="container">
+    <button  id="returnBtn" class="return-btn" title="Back to workspace">
+        ←
+    </button>
+    <div class="profile-card">
+        <h1 class="title">PROFILE SETTINGS</h1>
+
+        <!-- Profile Information Section -->
+        <div class="section" id="profileSection">
+            <div class="section-header">
+                <h2>Personal Information</h2>
+                <button class="edit-btn" onclick="toggleEdit('profile')">
+                    <span class="edit-icon">✎</span> Edit
+                </button>
+            </div>
+
+            <div class="form-group">
+                <label for="firstName">FIRST NAME</label>
+                <input type="text" id="firstName" disabled>
+            </div>
+
+            <div class="form-group">
+                <label for="lastName">LAST NAME</label>
+                <input type="text" id="lastName" disabled>
+            </div>
+
+            <div class="form-group">
+                <label for="emailAddress">EMAIL ADDRESS</label>
+                <input type="email" id="emailAddress"  disabled readonly class="readonly-field">
+                <span class="field-note">Email cannot be changed</span>
+            </div>
+
+            <div class="action-buttons" id="profileActions" style="display: none;">
+                <button class="btn-primary" onclick="saveProfile(event)">SAVE CHANGES</button>
+                <button class="btn-secondary" onclick="cancelEdit('profile')">CANCEL</button>
+            </div>
+        </div>
+
+        <!-- Password Section -->
+        <div class="section" id="passwordSection">
+            <div class="section-header">
+                <h2>Change Password</h2>
+                <button class="edit-btn" onclick="toggleEdit('password')">
+                    <span class="edit-icon">✎</span> Edit
+                </button>
+            </div>
+
+            <div class="password-fields" id="passwordFields" style="display: none;">
+                <div class="form-group">
+                    <label for="currentPassword">CURRENT PASSWORD</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="currentPassword" placeholder="Enter current password">
+                        <button class="toggle-password" onclick="togglePasswordVisibility('currentPassword', event)">
+                            <span class="eye-icon">👁</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="newPassword">NEW PASSWORD</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="newPassword" placeholder="Enter new password">
+                        <button class="toggle-password" onclick="togglePasswordVisibility('newPassword', event)">
+                            <span class="eye-icon">👁</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">CONFIRM NEW PASSWORD</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="confirmPassword" placeholder="Confirm new password">
+                        <button class="toggle-password" onclick="togglePasswordVisibility('confirmPassword', event)">
+                            <span class="eye-icon">👁</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="savePassword(event)">UPDATE PASSWORD</button>
+                    <button class="btn-secondary" onclick="cancelEdit('password')">CANCEL</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Actions -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Account Actions</h2>
+            </div>
+            <button class="btn-danger" id="logoutBtn">SIGN OUT</button>
+        </div>
+
+        <div class="footer">
+            <span class="brand">ECLIPSEWORK</span>
         </div>
     </div>
-</nav>
+</div>
 
-<div class="container">
-    <div class="form-card">
-        <h1 class="form-title">MY PROFILE</h1>
-
-        <form id="profileForm">
-            <div class="form-group">
-                <label>FULL NAME</label>
-                <input type="text" id="profileFullName" placeholder="NAME" required>
-            </div>
-
-            <div class="form-group">
-                <label>EMAIL ADDRESS</label>
-                <input type="email" id="profileEmail" placeholder="EMAIL-ADDRESS@ECWORK.COM" disabled>
-            </div>
-
-            <button type="submit" class="btn-primary">UPDATE PROFILE</button>
-        </form>
-
-        <div class="divider"></div>
-
-        <h2 class="section-title">CHANGE PASSWORD</h2>
-
-        <form id="passwordForm">
-            <div class="form-group">
-                <label>CURRENT PASSWORD</label>
-                <div class="password-input">
-                    <input type="password" id="currentPassword" placeholder="PASSWORD" required>
-                    <button type="button" class="toggle-password" data-target="currentPassword">
-                        <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>NEW PASSWORD</label>
-                <div class="password-input">
-                    <input type="password" id="newPassword" placeholder="PASSWORD" required>
-                    <button type="button" class="toggle-password" data-target="newPassword">
-                        <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>CONFIRM NEW PASSWORD</label>
-                <div class="password-input">
-                    <input type="password" id="confirmNewPassword" placeholder="PASSWORD" required>
-                    <button type="button" class="toggle-password" data-target="confirmNewPassword">
-                        <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <button type="submit" class="btn-primary">CHANGE PASSWORD</button>
-        </form>
-
-        <div class="logo-bottom">ECLIPSEWORK</div>
-    </div>
+<!-- Notification Toast -->
+<div class="toast" id="toast">
+    <span id="toastMessage"></span>
 </div>
 
 <script src="profile.js"></script>

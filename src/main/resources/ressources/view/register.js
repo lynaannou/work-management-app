@@ -42,8 +42,8 @@ function register() {
     console.log('Register function called from JavaScript');
     console.log('=================================');
 
-    // Check if Java bridge is available
-    if (typeof window.javaAuth === 'undefined') {
+    // ✅ FIXED: Check for javaBridge instead of javaAuth
+    if (typeof window.javaBridge === 'undefined') {
         console.error('Java bridge not found!');
         alert('Error: Application bridge not initialized. Please restart the application.');
         return;
@@ -78,7 +78,8 @@ function register() {
         console.log('Calling Java register method...');
         console.log('Parameters:', email, firstName, lastName, '[PASSWORD]');
 
-        const result = window.javaAuth.register(email, firstName, lastName, password);
+        // ✅ FIXED: Use javaBridge instead of javaAuth
+        const result = window.javaBridge.register(email, firstName, lastName, password);
 
         console.log('Register result type:', typeof result);
         console.log('Register result value:', result);
@@ -97,7 +98,7 @@ function register() {
             document.getElementById('login-form').style.display = 'flex';
         } else {
             // Result contains error message
-            alert('Registration failed: ' + result);
+            alert('Registration failed: ' + result.replace('ERROR: ', ''));
         }
     } catch (error) {
         console.error('JavaScript error during registration:', error);
@@ -106,57 +107,55 @@ function register() {
 }
 
 function login() {
-    console.log('=================================');
-    console.log('Login function called from JavaScript');
-    console.log('=================================');
+    console.log('=== LOGIN CALLED ===');
 
-    // Check if Java bridge is available
-    if (typeof window.javaAuth === 'undefined') {
-        console.error('Java bridge not found!');
-        alert('Error: Application bridge not initialized. Please restart the application.');
+    clearLoginError(); // ✅ clear old message
+
+    if (typeof window.javaBridge === 'undefined') {
+        showLoginError("Application not ready. Please restart.");
         return;
     }
 
-    const email = document.getElementById('login-email').value;
+    const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
 
-    console.log('Form values:');
-    console.log('- Email:', email);
-    console.log('- Password:', password ? '[PROVIDED]' : '[EMPTY]');
-
-    // Validate fields
     if (!email || !password) {
-        alert('Please fill in all fields');
+        showLoginError("Email and password are required");
         return;
     }
 
     try {
-        console.log('Calling Java login method...');
-        console.log('Parameters:', email, '[PASSWORD]');
+        const result = window.javaBridge.login(email, password);
+        console.log("Login result:", result);
 
-        const result = window.javaAuth.login(email, password);
-
-        console.log('Login result type:', typeof result);
-        console.log('Login result value:', result);
-        console.log('=================================');
-
-        if (result === undefined || result === null) {
-            console.error('Result is undefined or null!');
-            alert('Error: Login returned no response. Check console for details.');
+        if (result === "SUCCESS") {
+            window.javaBridge.navigateTo("workspace.html");
             return;
         }
 
-        if (result === 'SUCCESS') {
-            alert('Login successful!');
-            window.javaAuth.loadPage("workspace.html");
-        } else {
-            // Result contains error message
-            alert('Login failed: ' + result);
+        // 🔴 ERROR returned from Java
+        if (result.startsWith("ERROR")) {
+            showLoginError(result.replace("ERROR:", "").trim());
+            return;
         }
-    } catch (error) {
-        console.error('JavaScript error during login:', error);
-        alert('Error: ' + error.message);
+
+        showLoginError("Unknown login error");
+
+    } catch (e) {
+        console.error(e);
+        showLoginError("Unexpected error occurred");
     }
+}
+function showLoginError(message) {
+    const box = document.getElementById("login-error");
+    box.textContent = message;
+    box.style.display = "block";
+}
+
+function clearLoginError() {
+    const box = document.getElementById("login-error");
+    box.textContent = "";
+    box.style.display = "none";
 }
 
 // Form submissions
@@ -176,15 +175,11 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
 window.addEventListener('load', function() {
     console.log('=================================');
     console.log('Page loaded');
-    console.log('Java bridge available:', typeof window.javaAuth !== 'undefined');
-    if (typeof window.javaAuth !== 'undefined') {
-        console.log('Testing bridge with test() method...');
-        try {
-            const testResult = window.javaAuth.test();
-            console.log('Bridge test result:', testResult);
-        } catch (e) {
-            console.error('Bridge test failed:', e);
-        }
+    // ✅ FIXED: Check for javaBridge instead of javaAuth
+    console.log('Java bridge available:', typeof window.javaBridge !== 'undefined');
+    if (typeof window.javaBridge !== 'undefined') {
+        console.log('✅ Bridge is ready!');
+        console.log('Available methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(window.javaBridge)));
     }
     console.log('=================================');
 });

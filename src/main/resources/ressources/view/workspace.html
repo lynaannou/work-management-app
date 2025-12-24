@@ -21,7 +21,7 @@
         </nav>
     </div>
 
-    <div class="user-zone">
+    <div class="user-zone" onclick="goToProfile()" style="cursor: pointer;">
         <img src="user.png" class="user-icon" />
         <span class="user-name">Full Name</span>
     </div>
@@ -46,8 +46,38 @@
     </div>
 </section>
 
-<!-- ====== SINGLE FINAL loadDashboard FUNCTION ====== -->
 <script>
+    // ====== NAVIGATION TO PROFILE ======
+    function goToProfile() {
+        console.log("Navigating to profile page...");
+        if (window.javaBridge) {
+            window.javaBridge.navigateTo("profile.html");
+        } else {
+            console.error("Java bridge not available!");
+        }
+    }
+
+    // ====== LOAD USER INFO ON PAGE LOAD ======
+    window.addEventListener('load', function() {
+        console.log("Workspace page loaded");
+
+        if (window.javaBridge) {
+            try {
+                const userInfoJson = window.javaBridge.getCurrentUserInfo();
+                const userInfo = JSON.parse(userInfoJson);
+
+                if (userInfo.firstName && userInfo.lastName) {
+                    document.querySelector(".user-name").textContent =
+                        userInfo.firstName + " " + userInfo.lastName;
+                    console.log("User info loaded:", userInfo);
+                }
+            } catch (e) {
+                console.error("Error loading user info:", e);
+            }
+        }
+    });
+
+    // ====== DASHBOARD DATA FUNCTION ======
     function loadDashboard(data) {
         console.log("Dashboard received:", data);
 
@@ -63,7 +93,7 @@
         // 2. Workspace Title
         // ===============================
         document.querySelector(".workspace-title").textContent =
-            "Monthly Progression – " + data.workspace.name;
+            "Monthly Progression — " + data.workspace.name;
 
         // ===============================
         // 3. TASKS (dynamic bars)
