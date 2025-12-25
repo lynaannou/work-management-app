@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ECLIPSEWORK – New Project</title>
+  <link rel="stylesheet" href="project-form.css">
+</head>
+
+<body>
+
+<!-- =========================
+     NAVBAR
+========================= -->
+<div class="navbar">
+  <div class="nav-left">
+    <div class="brand">ECLIPSEWORK</div>
+
+    <div class="nav-links">
+      <a href="#" onclick="goDashboard()">DASHBOARD</a>
+      <a href="#" class="active">PROJECTS</a>
+      <a href="#" onclick="goTasks()">TASKS</a>
+    </div>
+  </div>
+
+  <div class="nav-right">
+    <div class="avatar">
+      <img src="user.png" alt="user">
+    </div>
+    <div class="user-name">...</div>
+  </div>
+</div>
+<div class="page-actions">
+  <button class="back-btn" onclick="goBackToProjects()">Back to Projects</button>
+</div>
+
+
+<!-- =========================
+     PAGE TITLE
+========================= -->
+<h2 class="page-title">BEGIN A NEW PROJECT</h2>
+
+<!-- =========================
+     PROJECT FORM
+========================= -->
+<div class="form-container">
+
+  <label for="projectTitle">TITLE</label>
+  <input
+    type="text"
+    id="projectTitle"
+    placeholder="PROJECT’S TITLE"
+  />
+
+  <label for="projectDescription">DESCRIPTION</label>
+  <textarea
+    id="projectDescription"
+    placeholder="PROJECT’S DESCRIPTION"
+  ></textarea>
+
+  <label for="inviteEmail">INVITE MEMBERS</label>
+  <input
+    type="email"
+    id="inviteEmail"
+    placeholder="INSERT EMAIL"
+  />
+
+  <label>TASKS</label>
+  <button class="btn-secondary" onclick="checkTasks()">
+    CHECK TASKS
+  </button>
+
+  <div class="actions">
+    <button class="btn-save" onclick="saveProject()">
+      SAVE PROJECT
+    </button>
+
+    <button class="btn-delete" onclick="deleteProject()">
+      DELETE PROJECT
+    </button>
+  </div>
+</div>
+
+<!-- =========================
+     NAVIGATION FUNCTIONS
+========================= -->
+<script>
+function goDashboard() {
+  if (window.java && window.java.openDashboard) {
+    window.java.openDashboard();
+  } else {
+    console.warn("Dashboard navigation not available");
+  }
+}
+
+function goTasks() {
+  if (window.java && window.java.openTasks) {
+    window.java.openTasks();
+  } else {
+    console.warn("Tasks navigation not available");
+  }
+}
+</script>
+
+<!-- =========================
+     PROJECT ACTIONS (STUB)
+========================= -->
+<script>
+function checkTasks() {
+  console.log("📋 Check tasks clicked");
+}
+
+function saveProject() {
+  if (!window.currentUser) {
+    alert("User not loaded");
+    return;
+  }
+
+  if (!window.javaBridge || !window.javaBridge.createProject) {
+    alert("Backend bridge not available");
+    return;
+  }
+
+  const title = document.getElementById("projectTitle").value.trim();
+  const description = document.getElementById("projectDescription").value.trim();
+  const inviteEmail = document.getElementById("inviteEmail").value.trim();
+
+  if (!title) {
+    alert("Project title is required");
+    return;
+  }
+
+  // You decided: invite by EMAIL, CSV-compatible
+  const invitedEmailsCsv = inviteEmail; // single email for now
+
+  console.log("💾 Creating project:", {
+    title,
+    description,
+    invitedEmailsCsv
+  });
+
+  // 🔗 CALL JAVA BACKEND
+  const raw = window.javaBridge.createProject(
+    title,
+    description,
+    invitedEmailsCsv
+  );
+
+  if (!raw) {
+    alert("No response from server");
+    return;
+  }
+
+  let response;
+  try {
+    response = JSON.parse(raw);
+  } catch (e) {
+    console.error("Invalid JSON from backend:", raw);
+    alert("Server error");
+    return;
+  }
+
+  if (!response.success) {
+    alert(response.error || "Project creation failed");
+    return;
+  }
+
+  console.log("✅ Project created with teamId =", response.teamId);
+
+  // 🔁 Redirect to projects list
+  if (window.java && window.java.navigateTo) {
+    window.java.navigateTo("projects.html");
+  } else {
+    console.warn("Navigation not available, reloading");
+    location.reload();
+  }
+}
+</script>
+
+</script>
+
+<!-- =========================
+     USER CONTEXT INITIALIZATION
+========================= -->
+<script>
+function initUserContext() {
+
+  if (!window.javaBridge) {
+    console.warn("⏳ Waiting for javaBridge...");
+    setTimeout(initUserContext, 50);
+    return;
+  }
+
+  const raw = window.javaBridge.getCurrentUserInfo();
+
+  if (!raw || raw === "{}") {
+    console.error("❌ No authenticated user");
+    return;
+  }
+
+  try {
+    const user = JSON.parse(raw);
+
+    // SINGLE SOURCE OF TRUTH
+    window.currentUser = {
+      id: user.userId,
+      fullName: user.firstName + " " + user.lastName,
+      email: user.email,
+      role: user.role
+    };
+
+    const nameEl = document.querySelector(".user-name");
+    if (nameEl) {
+      nameEl.textContent = window.currentUser.fullName;
+    }
+
+    console.log("✅ Current user loaded:", window.currentUser);
+
+  } catch (e) {
+    console.error("❌ Failed to parse user info", e);
+  }
+}
+
+// Start initialization
+initUserContext();
+</script>
+<script>
+function goBackToProjects() {
+  if (window.java && window.java.navigateTo) {
+    window.java.navigateTo("projects.html");
+  } else {
+    console.warn("Projects navigation not available");
+  }
+}
+</script>
+
+</body>
+</html>

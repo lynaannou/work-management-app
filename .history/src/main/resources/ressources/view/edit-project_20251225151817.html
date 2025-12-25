@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ECLIPSEWORK – Edit Project</title>
+    <link rel="stylesheet" href="edit-project.css" />
+</head>
+
+<body>
+
+<!-- =========================
+     HEADER / NAVBAR
+========================= -->
+<header>
+    <div class="left-zone">
+        <h1 class="logo-title">ECLIPSEWORK</h1>
+        <nav>
+            <a href="#" onclick="goDashboard()">Dashboard</a>
+            <a href="#" onclick="goProjects()">Projects</a>
+            <a href="#" onclick="goTasks()">Tasks</a>
+        </nav>
+    </div>
+
+    <div class="user-zone">
+        <img src="user.png" class="user-icon" />
+        <span class="user-name">—</span>
+    </div>
+</header>
+
+<!-- =========================
+     MAIN
+========================= -->
+<section class="editor-container">
+
+    <!-- ✅ FIXED: go back to SAME workspace -->
+    <button class="back-btn" onclick="goBackToWorkspace()">Back to Workspace</button>
+
+    <h2 class="page-title">Edit Project</h2>
+
+    <!-- =========================
+         ERROR BOX
+    ========================= -->
+    <div id="errorBox" class="error-box" style="display:none;"></div>
+
+    <!-- =========================
+         FORM
+    ========================= -->
+    <div class="form-card">
+
+        <label>PROJECT TITLE</label>
+        <input type="text" id="projectTitle" placeholder="Project title" />
+
+        <label>DESCRIPTION</label>
+        <textarea id="projectDescription" placeholder="Project description"></textarea>
+
+        <label>TEAM MEMBERS</label>
+        <p class="hint">Max 4 members + you (leader)</p>
+
+        <div class="invite-box">
+            <input
+                type="email"
+                id="inviteEmail"
+                placeholder="Invite by email"
+                oninput="searchUsers(this.value)"
+            />
+            <div id="inviteResults" class="invite-results"></div>
+            <div id="selectedMembers" class="selected-members"></div>
+        </div>
+
+        <div class="actions">
+            <button class="btn-save" onclick="saveChanges()">SAVE CHANGES</button>
+            <button class="btn-danger" onclick="deleteProject()">DELETE PROJECT</button>
+        </div>
+    </div>
+</section>
+
+<!-- =========================
+     SCRIPTS
+========================= -->
+<script>
+/* ===============================
+   USER (NAVBAR)
+================================ */
+function initNavbarUser() {
+    if (!window.javaBridge) {
+        setTimeout(initNavbarUser, 50);
+        return;
+    }
+
+    const raw = window.javaBridge.getCurrentUserInfo();
+    if (!raw || raw === "{}") return;
+
+    const user = JSON.parse(raw);
+    document.querySelector(".user-name").textContent =
+        user.firstName + " " + user.lastName;
+}
+document.addEventListener("DOMContentLoaded", initNavbarUser);
+
+/* ===============================
+   ERROR HANDLER
+================================ */
+function showError(message) {
+    const box = document.getElementById("errorBox");
+    box.textContent = message;
+    box.style.display = "block";
+}
+
+/* ===============================
+   MEMBERS LOGIC
+================================ */
+const selectedUsers = new Map();
+
+function searchUsers(value) {
+    const box = document.getElementById("inviteResults");
+    box.innerHTML = "";
+
+    if (!value || value.length < 2) return;
+
+    const raw = window.javaBridge.searchUsersByEmail(value);
+    const users = JSON.parse(raw);
+
+    users.forEach(u => {
+        if (selectedUsers.has(u.userId)) return;
+
+        const div = document.createElement("div");
+        div.className = "invite-item";
+        div.textContent = u.email;
+
+        div.onclick = () => addMember(u);
+        box.appendChild(div);
+    });
+}
+
+function addMember(user) {
+    if (selectedUsers.size >= 4) {
+        showError("A project can only have 4 members + the leader.");
+        return;
+    }
+
+    selectedUsers.set(user.userId, user);
+    renderMembers();
+
+    document.getElementById("inviteEmail").value = "";
+    document.getElementById("inviteResults").innerHTML = "";
+}
+
+function removeMember(id) {
+    selectedUsers.delete(id);
+    renderMembers();
+}
+
+function renderMembers() {
+    const container = document.getElementById("selectedMembers");
+    container.innerHTML = "";
+
+    selectedUsers.forEach(user => {
+        const chip = document.createElement("div");
+        chip.className = "member-chip";
+        chip.innerHTML = `
+            ${user.email}
+            <span onclick="removeMember(${user.userId})">×</span>
+        `;
+        container.appendChild(chip);
+    });
+}
+
+/* ===============================
+   SAVE / DELETE
+================================ */
+function saveChanges() {
+    const title = document.getElementById("projectTitle").value.trim();
+    const desc = document.getElementById("projectDescription").value.trim();
+
+    if (!title) {
+        showError("Project title is required.");
+        return;
+    }
+
+    if (selectedUsers.size === 0) {
+        showError("A project must have at least one member.");
+        return;
+    }
+
+    // 🔗 BACKEND HOOK COMES NEXT
+    alert("✅ Changes validated (backend hook next)");
+}
+
+function deleteProject() {
+    if (!confirm("Delete this project permanently?")) return;
+    alert("🗑️ Project deletion hook here");
+}
+
+/* ===============================
+   NAVIGATION
+================================ */
+function goBackToWorkspace() {
+    window.java?.goToWorkspace?.();
+}
+
+function goProjects() { window.java?.goProjects?.(); }
+function goDashboard() { window.java?.goDashboard?.(); }
+function goTasks() { window.java?.goTasks?.(); }
+</script>
+
+</body>
+</html>

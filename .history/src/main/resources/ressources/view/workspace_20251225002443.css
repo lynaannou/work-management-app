@@ -1,0 +1,195 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Italiana&display=swap');
+
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    color: #fbfafa;
+    background: linear-gradient(-47deg, #fbfafa, #fff7f7, #fdffff);
+    background-size: 400% 400%;
+    animation: gradientMove 15s ease infinite;
+}
+
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* ---------------- HEADER ---------------- */
+
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 60px;
+    padding: 0 40px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    background: rgba(252, 233, 245, 0.23);
+    backdrop-filter: blur(5px);
+
+    z-index: 100;
+}
+
+header .logo-title {
+    font-family: 'Italiana', serif;
+    font-weight: 400;
+    font-size: 1.4rem;
+    line-height: 100%;
+    color: #0078D4;
+}
+
+.left-zone {
+    display: flex;
+    align-items: center;
+    gap: 35px;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    gap: 35px;
+}
+
+nav a {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    text-decoration: none;
+    color: #333;
+    opacity: 0.7;
+    transition: 0.2s;
+}
+
+nav a:hover {
+    opacity: 1;
+}
+
+.user-zone {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    left: -90px;
+}
+
+.user-icon {
+    width: 30px;
+    height: 30px;
+}
+
+.user-name {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    color: #000;
+    opacity: 0.8;
+}
+
+/* ---------------- WORKSPACE ---------------- */
+
+.workspace-container {
+    margin-top: 120px;
+    padding: 40px 60px;
+    color: #000;
+}
+
+.workspace-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 25px;
+}
+
+.chart-container {
+    background: #b3b3b3b2;
+    border-radius: 14px;
+    padding: 30px 40px;
+}
+
+.chart-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    font-size: 0.9rem;
+    color: #333;
+    opacity: 0.9;
+    margin-bottom: 25px;
+}
+
+.tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.task-row {
+    position: relative;
+    width: 100%;
+    height: 25px;
+}
+
+.task-bar {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    border-radius: 8px;
+
+    background: linear-gradient(to right, #41b36e, #7ddf9e);
+
+    color: white;
+    font-size: 0.8rem;
+    text-align: center;
+    line-height: 25px;
+
+    left: var(--start);
+    width: calc(var(--end) - var(--start));
+    transition: 0.3s;
+}
+
+.task-bar:hover {
+    transform: scaleY(1.05);
+}
+/* ===============================
+   BACK BUTTON
+================================ */
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 18px;
+    padding: 8px 14px;
+
+    background: transparent;
+    color: #2f80ed;
+
+    border: 1px solid #2f80ed;
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Hover effect */
+.back-btn:hover {
+    background: #2f80ed;
+    color: #ffffff;
+}
+
+/* Click feedback */
+.back-btn:active {
+    transform: scale(0.97);
+}
+
+/* Optional arrow spacing */
+.back-btn::before {
+    content: "←";
+    font-size: 16px;
+}

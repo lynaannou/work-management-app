@@ -1,0 +1,183 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Italiana&display=swap');
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: #f7f8fa;
+    color: #111;
+}
+
+/* HEADER */
+header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 60px;
+    padding: 0 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.9);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.logo-title {
+    font-family: 'Italiana', serif;
+    color: #0078D4;
+}
+
+nav {
+    display: flex;
+    gap: 30px;
+}
+
+nav a {
+    text-decoration: none;
+    color: #333;
+    opacity: 0.7;
+}
+
+.user-zone {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* MAIN */
+.editor-container {
+    margin-top: 100px;
+    padding: 40px 60px;
+    max-width: 900px;
+}
+.user-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+
+.page-title {
+    font-size: 1.6rem;
+    margin-bottom: 20px;
+}
+
+/* ERROR */
+.error-box {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+}
+
+/* FORM */
+.form-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 30px;
+    border: 1px solid rgba(0,0,0,0.06);
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 6px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-family: inherit;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 90px;
+}
+
+.hint {
+    font-size: 0.8rem;
+    opacity: 0.6;
+}
+
+/* INVITE */
+.invite-box {
+    position: relative;
+}
+
+.invite-results {
+    position: absolute;
+    background: #fff;
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    z-index: 5;
+}
+
+.invite-item {
+    padding: 8px 10px;
+    cursor: pointer;
+}
+
+.invite-item:hover {
+    background: #f1f5f9;
+}
+
+.selected-members {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.member-chip {
+    background: #e5f0ff;
+    color: #1d4ed8;
+    padding: 6px 10px;
+    border-radius: 16px;
+    font-size: 0.8rem;
+}
+
+.member-chip span {
+    margin-left: 6px;
+    cursor: pointer;
+}
+
+/* ACTIONS */
+.actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+.btn-save {
+    background: #2563eb;
+    color: #fff;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-danger {
+    background: transparent;
+    color: #dc2626;
+    border: 1px solid #dc2626;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.back-btn {
+    margin-bottom: 20px;
+    background: none;
+    border: none;
+    color: #2563eb;
+    cursor: pointer;
+}

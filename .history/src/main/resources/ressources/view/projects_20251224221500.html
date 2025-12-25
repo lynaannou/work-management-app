@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ECLIPSEWORK – Projects</title>
+  <link rel="stylesheet" href="projects.css">
+</head>
+<body>
+
+<!-- =========================
+     NAVBAR
+========================= -->
+<div class="navbar">
+  <div class="nav-left">
+    <div class="brand">ECLIPSEWORK</div>
+
+    <div class="nav-links">
+      <a href="#" onclick="goDashboard()">DASHBOARD</a>
+      <a href="#" class="active">PROJECTS</a>
+      <a href="#" onclick="goTasks()">TASKS</a>
+    </div>
+  </div>
+
+  <div class="nav-right">
+    <div class="avatar">
+      <img src="user.png" alt="user">
+    </div>
+    <div class="user-name">FULL NAME</div>
+  </div>
+</div>
+
+<!-- =========================
+     PAGE HEADER
+========================= -->
+<div class="page-header">
+  <h2>My Projects</h2>
+
+  <button class="btn-primary" onclick="openNewProject()">
+    + NEW PROJECT
+  </button>
+</div>
+
+
+<!-- =========================
+     PROJECTS TABLE
+========================= -->
+<table id="projectsTable">
+  <thead>
+    <tr>
+      <th>PROJECTS</th>
+      <th>DESCRIPTION</th>
+      <th>ROLE</th>
+      <th class="col-center">TASKS</th>
+      <th class="col-center">PROGRESSION</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+function loadProjects(data) {
+  if (data.length > 0 && data[0].leader) {
+  const leader = data[0].leader;
+  document.querySelector(".user-name").textContent =
+    leader.firstName + " " + leader.lastName;
+}
+
+  const tbody = document.querySelector("#projectsTable tbody");
+  tbody.innerHTML = "";
+
+  data.forEach(ws => {
+    const done = ws.progress.done;
+    const total = ws.progress.total;
+    const pct = total === 0 ? 0 : Math.round(done / total * 100);
+
+const roleClass =
+  ws.leader && ws.leader.user_id === window.currentUserId
+    ? "leader"
+    : "member";
+
+
+    const roleLabel =
+      roleClass === "leader" ? "LEADER" : "MEMBER";
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>
+        <div class="project-name">
+          ${ws.workspace.name}
+          <span class="edit">✎</span>
+        </div>
+      </td>
+
+      <td>
+        ${ws.workspace.description || "—"}
+      </td>
+
+      <td>
+        <span class="role ${roleClass}">
+          ${roleLabel}
+        </span>
+      </td>
+
+      <td class="col-center">
+        <button class="btn">
+          SEE TASKS
+        </button>
+      </td>
+
+      <td class="col-center">
+        <button class="btn" onclick="openWorkspace(${ws.workspace.teamId})">
+          ${pct}% – SEE PROGRESSION
+        </button>
+      </td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+}
+
+// JavaFX hook
+function openWorkspace(teamId) {
+  if (window.java && window.java.openWorkspace) {
+    window.java.openWorkspace(teamId);
+  }
+}
+
+// Optional future hooks
+function goDashboard() {
+  if (window.java && window.java.goDashboard) {
+    window.java.goDashboard();
+  }
+}
+
+function goTasks() {
+  if (window.java && window.java.goTasks) {
+    window.java.goTasks();
+  }
+}
+</script>
+
+</body>
+</html>

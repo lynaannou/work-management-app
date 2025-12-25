@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ECLIPSEWORK</title>
+    <link rel="stylesheet" href="workspace.css" />
+</head>
+
+<body>
+
+<header>
+    <div class="left-zone">
+        <h1 class="logo-title">ECLIPSEWORK</h1>
+
+        <nav>
+            <a href="#" onclick="goDashboard()">Dashboard</a>
+            <a href="#" onclick="goProjects()">Projects</a>
+            <a href="#" onclick="goTasks()">Tasks</a>
+        </nav>
+    </div>
+
+    <div class="user-zone" style="cursor: pointer;">
+        <img src="user.png" class="user-icon" />
+        <span class="user-name">—</span>
+    </div>
+</header>
+
+<!-- MAIN CONTENT -->
+<section class="workspace-container">
+    <button class="back-btn" onclick="goProjects()">Back to Projects</button>
+
+    <h2 class="workspace-title">Progression</h2>
+
+    <div class="chart-container">
+
+        <div class="chart-header">
+            <span>Start Date</span>
+            <span>End Date</span>
+        </div>
+
+        <div class="tasks-list"></div>
+
+    </div>
+</section>
+
+<script>
+/* =====================================================
+   SAFE NAVIGATION (JAVA CONTROLS PAGES)
+===================================================== */
+
+function goProjects() {
+    if (window.javaBridge && window.javaBridge.navigateTo) {
+        console.log("⬅️ Navigating to projects");
+        window.javaBridge.navigateTo("projects.html");
+    } else {
+        console.error("javaBridge.navigateTo not available");
+    }
+}
+
+function goDashboard() {
+    console.warn("Dashboard navigation not implemented yet");
+}
+
+function goTasks() {
+    console.warn("Tasks navigation not implemented yet");
+}
+</script>
+<script>
+/* =====================================================
+   MAIN DATA ENTRY POINT (CALLED FROM JAVA)
+===================================================== */
+
+function loadDashboard(data) {
+    console.log("📊 Dashboard received:", data);
+
+    if (!data || !data.workspace) {
+        console.error("Invalid dashboard payload");
+        return;
+    }
+
+    /* ===============================
+       1. USER NAME (LEADER)
+    =============================== */
+    if (data.leader && data.leader.firstName && data.leader.lastName) {
+        document.querySelector(".user-name").textContent =
+            data.leader.firstName + " " + data.leader.lastName;
+    } else {
+        document.querySelector(".user-name").textContent = "User";
+    }
+
+    /* ===============================
+       2. WORKSPACE TITLE
+    =============================== */
+    document.querySelector(".workspace-title").textContent =
+        "Progression — " + data.workspace.name;
+
+    /* ===============================
+       3. TASKS (PROGRESSION BARS)
+    =============================== */
+    const tasksList = document.querySelector(".tasks-list");
+    tasksList.innerHTML = "";
+
+    if (!data.tasks || data.tasks.length === 0) {
+        tasksList.innerHTML = "<p>No tasks available</p>";
+        return;
+    }
+
+    data.tasks.forEach((task, i) => {
+        const row = document.createElement("div");
+        row.classList.add("task-row");
+
+        const bar = document.createElement("div");
+        bar.classList.add("task-bar");
+
+        bar.textContent = task.title || "Untitled task";
+
+        if (data.startPcts && data.endPcts) {
+            bar.style.setProperty("--start", (data.startPcts[i] || 0) + "%");
+            bar.style.setProperty("--end", (data.endPcts[i] || 0) + "%");
+        }
+
+        row.appendChild(bar);
+        tasksList.appendChild(row);
+    });
+
+    /* ===============================
+       4. TIMELINE DATES
+    =============================== */
+    const header = document.querySelector(".chart-header");
+
+    const keepStart = header.children[0];
+    const keepEnd = header.children[header.children.length - 1];
+
+    while (header.children.length > 2) {
+        header.removeChild(header.children[1]);
+    }
+
+    if (data.dateLabels && data.dateLabels.length > 0) {
+        data.dateLabels.forEach(date => {
+            const span = document.createElement("span");
+            span.textContent = date;
+            header.insertBefore(span, keepEnd);
+        });
+    }
+}
+</script>
+
+</body>
+</html>

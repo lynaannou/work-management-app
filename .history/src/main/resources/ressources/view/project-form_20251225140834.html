@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ECLIPSEWORK – New Project</title>
+  <link rel="stylesheet" href="project-form.css">
+</head>
+
+<body>
+
+<!-- =========================
+     NAVBAR
+========================= -->
+<div class="navbar">
+  <div class="nav-left">
+    <div class="brand">ECLIPSEWORK</div>
+
+    <div class="nav-links">
+      <a href="#" onclick="goDashboard()">DASHBOARD</a>
+      <a href="#" class="active">PROJECTS</a>
+      <a href="#" onclick="goTasks()">TASKS</a>
+    </div>
+  </div>
+
+  <div class="nav-right">
+    <div class="avatar">
+      <img src="user.png" alt="user">
+    </div>
+    <div class="user-name">...</div>
+  </div>
+</div>
+
+<div class="page-actions">
+  <button class="back-btn" onclick="goBackToProjects()">Back to Projects</button>
+</div>
+
+<h2 class="page-title">BEGIN A NEW PROJECT</h2>
+
+<!-- =========================
+     PROJECT FORM
+========================= -->
+<div class="form-container">
+
+  <label for="projectTitle">TITLE</label>
+  <input type="text" id="projectTitle" placeholder="PROJECT’S TITLE"/>
+
+  <label for="projectDescription">DESCRIPTION</label>
+  <textarea id="projectDescription" placeholder="PROJECT’S DESCRIPTION"></textarea>
+
+  <label for="inviteEmail">INVITE MEMBERS</label>
+
+  <div class="invite-box">
+    <input
+      type="email"
+      id="inviteEmail"
+      placeholder="Type email…"
+      oninput="searchUsers(this.value)"
+    />
+
+    <div id="inviteResults" class="invite-results"></div>
+    <div id="selectedMembers" class="selected-members"></div>
+  </div>
+
+  <!-- ✅ ERROR BOX -->
+  <div id="form-error" class="form-error" style="display:none;"></div>
+
+  <label>TASKS</label>
+  <button class="btn-secondary" onclick="checkTasks()">CHECK TASKS</button>
+
+  <div class="actions">
+    <button class="btn-save" onclick="saveProject()">SAVE PROJECT</button>
+    <button class="btn-delete" onclick="deleteProject()">DELETE PROJECT</button>
+  </div>
+</div>
+
+<!-- =========================
+     ERROR HANDLING
+========================= -->
+<script>
+function showError(message) {
+  const box = document.getElementById("form-error");
+  box.textContent = message;
+  box.style.display = "block";
+}
+
+function clearError() {
+  const box = document.getElementById("form-error");
+  box.textContent = "";
+  box.style.display = "none";
+}
+</script>
+
+<!-- =========================
+     INVITE LOGIC
+========================= -->
+<script>
+const selectedUsers = new Map();
+const MAX_MEMBERS = 4; // + leader = 5
+
+function searchUsers(value) {
+  const results = document.getElementById("inviteResults");
+  results.innerHTML = "";
+
+  if (!value || value.length < 3) return;
+
+  if (!window.javaBridge?.searchUsersByEmail) return;
+
+  const raw = window.javaBridge.searchUsersByEmail(value);
+
+  let users;
+  try {
+    users = JSON.parse(raw);
+  } catch {
+    showError("Unexpected server response.");
+    return;
+  }
+
+  if (!users || users.length === 0) {
+    showError("No user found with this email.");
+    return;
+  }
+
+  clearError();
+
+  users.forEach(u => {
+    if (selectedUsers.has(u.userId)) return;
+
+    const div = document.createElement("div");
+    div.className = "invite-item";
+    div.textContent = u.email;
+
+    div.onclick = () => addMember(u);
+    results.appendChild(div);
+  });
+}
+
+function addMember(user) {
+  if (selectedUsers.size >= MAX_MEMBERS) {
+    showError("A project can have a maximum of 5 members (including the leader).");
+    return;
+  }
+
+  selectedUsers.set(user.userId, user);
+  document.getElementById("inviteEmail").value = "";
+  document.getElementById("inviteResults").innerHTML = "";
+
+  renderSelectedMembers();
+}
+
+function removeMember(userId) {
+  selectedUsers.delete(userId);
+  renderSelectedMembers();
+}
+
+function renderSelectedMembers() {
+  const container = document.getElementById("selectedMembers");
+  container.innerHTML = "";
+
+  selectedUsers.forEach(user => {
+    const chip = document.createElement("div");
+    chip.className = "member-chip";
+    chip.innerHTML = `
+      ${user.email}
+      <span onclick="removeMember(${user.userId})">×</span>
+    `;
+    container.appendChild(chip);
+  });
+}
+</script>
+
+<!-- =========================
+     SAVE PROJECT
+========================= -->
+<script>
+function saveProject() {
+  clearError();
+
+  const title = document.getElementById("projectTitle").value.trim();
+  const description = document.getElementById("projectDescription").value.trim();
+
+  if (!title) {
+    showError("Project title is required.");
+    return;
+  }
+
+  if (selectedUsers.size === 0) {
+    showError("You must add at least one team member.");
+    return;
+  }
+
+  const emails = Array.from(selectedUsers.values()).map(u => u.email);
+
+  try {
+    const raw = window.javaBridge.createProject(
+      title,
+      description,
+      emails.join(",")
+    );
+
+    const res = JSON.parse(raw);
+
+    if (!res.success) {
+      showError(res.error || "Project creation failed.");
+      return;
+    }
+
+    window.java?.navigateTo?.("projects.html");
+
+  } catch (e) {
+    console.error(e);
+    showError("An unexpected error occurred.");
+  }
+}
+</script>
+
+<!-- =========================
+     USER CONTEXT
+========================= -->
+<script>
+function initUserContext() {
+  if (!window.javaBridge) {
+    setTimeout(initUserContext, 50);
+    return;
+  }
+
+  const raw = window.javaBridge.getCurrentUserInfo();
+  if (!raw) return;
+
+  const user = JSON.parse(raw);
+  window.currentUser = user;
+
+  document.querySelector(".user-name").textContent =
+    user.firstName + " " + user.lastName;
+}
+initUserContext();
+</script>
+
+<!-- =========================
+     NAVIGATION
+========================= -->
+<script>
+function goBackToProjects() {
+  window.java?.goProjects?.();
+}
+function goDashboard() {
+  window.java?.goDashboard?.();
+}
+function goTasks() {
+  window.java?.goTasks?.();
+}
+</script>
+
+</body>
+</html>
