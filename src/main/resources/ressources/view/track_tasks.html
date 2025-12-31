@@ -104,6 +104,24 @@
 <!-- ================== TABLE ================== -->
 <div class="table-container">
     <h1 style="margin-bottom:20px;">TASK LIST</h1>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <h1>TASK LIST</h1>
+
+    <button
+        onclick="addTask()"
+        style="
+            background:#4A6FA5;
+            color:white;
+            border:none;
+            padding:10px 16px;
+            border-radius:8px;
+            cursor:pointer;
+            font-weight:600;
+        ">
+        ➕ Add Task
+    </button>
+</div>
+
 
     <table class="tasks-table">
         <thead>
@@ -203,6 +221,19 @@ function waitForTeamId() {
 }
 
 document.addEventListener("DOMContentLoaded", waitForTeamId);
+function addTask() {
+    if (!window.currentTeamId) {
+        alert("No project selected");
+        return;
+    }
+
+    if (window.javaBridge && window.javaBridge.openNewTaskForm) {
+        window.javaBridge.openNewTaskForm(window.currentTeamId);
+    } else {
+        console.error("❌ openNewTaskForm not available");
+    }
+}
+
 </script>
 
 </body>

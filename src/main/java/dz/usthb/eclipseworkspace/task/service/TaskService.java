@@ -4,6 +4,7 @@ import dz.usthb.eclipseworkspace.task.dao.DaoTask;
 import dz.usthb.eclipseworkspace.task.model.Task;
 import dz.usthb.eclipseworkspace.team.dao.TeamMemberDao;
 import dz.usthb.eclipseworkspace.team.dao.TeamMemberDaoJdbc;
+import dz.usthb.eclipseworkspace.team.model.TeamMember;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,30 +22,37 @@ public class TaskService {
     // =================================================
     // CREATE
     // =================================================
-    public void createTask(Task task) {
+public void createTask(Task task) {
 
-        System.out.println("🟧 [TaskService] createTask()");
-        System.out.println("   teamId=" + task.getTeamId());
-        System.out.println("   assigneeId=" + task.getAssigneeId());
+    System.out.println("🟧 [TaskService] createTask()");
+    System.out.println("   teamId=" + task.getTeamId());
+    System.out.println("   assigneeId=" + task.getAssigneeId());
 
-if (task.getAssigneeId() != null && task.getAssigneeId() > 0) {
-    try {
-        boolean isMember = teamMemberDao.existsForTask(
-            (long) task.getAssigneeId(),  // ✅ team_member_id
-            (long) task.getId()           // ✅ task_id
-        );
+    // ✅ Validate assignee belongs to team
+    if (task.getAssigneeId() != null && task.getAssigneeId() > 0) {
+        try {
+            boolean valid = teamMemberDao.belongsToTeam(
+                (long) task.getAssigneeId(), // team_member_id
+                (long) task.getTeamId()      // team_id
+            );
 
-        if (!isMember) {
-            throw new IllegalArgumentException("User not in team");
+            if (!valid) {
+                throw new IllegalArgumentException(
+                    "Assignee does not belong to this team"
+                );
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(
+                "Error verifying team membership", e
+            );
         }
-    } catch (Exception e) {
-        throw new RuntimeException("Error verifying team membership", e);
     }
+
+    taskDao.create(task);
+    System.out.println("🟧 [TaskService] task persisted");
 }
 
-        taskDao.create(task);
-        System.out.println("🟧 [TaskService] task persisted");
-    }
 
     // =================================================
     // READ
@@ -148,4 +156,12 @@ public Task getTaskById(int taskId) {
 
         taskDao.delete(taskId);
     }
+    public List<TeamMember> getTeamMembers(int teamId) {
+    try {
+        return teamMemberDao.findByTeamId((long) teamId);
+    } catch (Exception e) {
+        throw new RuntimeException("Failed to load team members", e);
+    }
+}
+
 }

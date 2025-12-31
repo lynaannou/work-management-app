@@ -1,6 +1,7 @@
 package dz.usthb.eclipseworkspace;
 
 import dz.usthb.eclipseworkspace.config.DBConnection;
+import dz.usthb.eclipseworkspace.team.controller.TeamController;
 import dz.usthb.eclipseworkspace.team.dao.TeamMemberDaoJdbc;
 import dz.usthb.eclipseworkspace.team.service.TeamMemberService;
 import dz.usthb.eclipseworkspace.user.controller.MainController;
@@ -103,6 +104,12 @@ public class WorkspaceApp extends Application {
                 new TodoController(new DaoTodoTask(connection));
 
         // ==========================
+        // TEAM SERVICE + CONTROLLER
+        // ==========================
+        TeamController teamController =
+                new TeamController(teamMemberService);
+
+        // ==========================
         // UI
         // ==========================
         WebView webView = new WebView();
@@ -114,7 +121,8 @@ public class WorkspaceApp extends Application {
                 workspaceService,
                 workspaceController,
                 todoController,
-                taskController
+                taskController, 
+                teamController
         );
 
         stage.setScene(new Scene(webView, 1300, 750));

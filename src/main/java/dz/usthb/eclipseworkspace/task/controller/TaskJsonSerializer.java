@@ -2,10 +2,15 @@ package dz.usthb.eclipseworkspace.task.controller;
 
 import dz.usthb.eclipseworkspace.task.model.Task;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public class TaskJsonSerializer {
 
+    // =================================================
+    // TO JSON (UNCHANGED)
+    // =================================================
     public static String toJson(List<Task> tasks) {
 
         StringBuilder sb = new StringBuilder();
@@ -16,7 +21,6 @@ public class TaskJsonSerializer {
 
             sb.append("{")
               .append("\"id\":").append(t.getId()).append(",")
-
               .append("\"title\":\"").append(escape(t.getTitle())).append("\",")
 
               .append("\"description\":")
@@ -26,7 +30,6 @@ public class TaskJsonSerializer {
               .append(",")
 
               .append("\"status\":\"").append(t.getStatus()).append("\",")
-
               .append("\"progress\":").append(t.getProgressPct()).append(",")
 
               .append("\"startDate\":")
@@ -41,7 +44,6 @@ public class TaskJsonSerializer {
                       : "null")
               .append(",")
 
-              // 👇 NEW — assignee info
               .append("\"assigneeId\":").append(t.getAssigneeId()).append(",")
 
               .append("\"assigneeName\":")
@@ -56,6 +58,35 @@ public class TaskJsonSerializer {
 
         sb.append("]");
         return sb.toString();
+    }
+
+    // =================================================
+    // 🔥 FROM JSON (NEW)
+    // =================================================
+    public static Task fromJson(Map<String, Object> data) {
+
+        Task task = new Task();
+
+        task.setTeamId(((Number) data.get("teamId")).intValue());
+        task.setTitle((String) data.get("title"));
+        task.setDescription((String) data.get("description"));
+
+        Object assignee = data.get("assigneeId");
+        if (assignee != null) {
+            task.setAssigneeId(((Number) assignee).intValue());
+        }
+
+        Object dueDate = data.get("dueDate");
+        if (dueDate != null && !dueDate.toString().isBlank()) {
+            task.setDueDate(LocalDate.parse(dueDate.toString()));
+        }
+
+        // 🔒 FORCE BUSINESS RULES
+        task.setStateFromString("TODO");
+        task.setStartDate(LocalDate.now());
+        task.setProgressPct(0);
+
+        return task;
     }
 
     private static String escape(String s) {

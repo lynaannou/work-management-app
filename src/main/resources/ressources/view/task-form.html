@@ -61,7 +61,7 @@
             margin-bottom: 8px;
         }
 
-        input, textarea {
+        input, textarea, select {
             width: 100%;
             padding: 12px;
             border-radius: 10px;
@@ -81,6 +81,7 @@
             padding: 8px 16px;
             border-radius: 20px;
             cursor: pointer;
+            border: 1px solid var(--border);
         }
 
         .status-badge.selected {
@@ -134,6 +135,13 @@
         </div>
     </div>
 
+    <div class="form-group">
+        <label>ASSIGN TO</label>
+        <select id="assigneeSelect">
+            <option value="">— Unassigned —</option>
+        </select>
+    </div>
+
     <button class="btn-save" onclick="saveTask()">✓ SAVE</button>
 </div>
 
@@ -142,10 +150,57 @@ let currentStatus = "TODO";
 let originalTask = null;
 
 /* ===============================
+   LOAD TEAM MEMBERS
+================================ */
+function loadTeamMembers() {
+
+    console.log("🟦 loadTeamMembers()");
+
+    if (!window.javaBridge) {
+        console.error("❌ javaBridge not ready");
+        return;
+    }
+
+    if (!window.currentTeamId || window.currentTeamId <= 0) {
+        console.error("❌ invalid currentTeamId =", window.currentTeamId);
+        return;
+    }
+
+    const json = window.javaBridge.loadTeamMembers(window.currentTeamId);
+    console.log("🟦 team members json =", json);
+
+    let members = [];
+    try {
+        members = JSON.parse(json);
+    } catch (e) {
+        console.error("❌ JSON parse error", e);
+        return;
+    }
+
+    const select = document.getElementById("assigneeSelect");
+    select.innerHTML = `<option value="">— Unassigned —</option>`;
+
+    if (members.length === 0) {
+        console.warn("⚠ no team members received");
+        return;
+    }
+
+    members.forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m.teamMemberId; // FK → task.team_member_id
+        opt.textContent = `${m.firstName} ${m.lastName} (${m.role})`;
+        select.appendChild(opt);
+    });
+}
+
+/* ===============================
    LOAD TASK FOR EDIT
 ================================ */
 function loadTaskForEdit() {
 
+    console.log("🟦 loadTaskForEdit()");
+
+    if (!window.javaBridge) return;
     if (!window.currentTaskId || !window.currentTeamId) return;
 
     const tasks = JSON.parse(
@@ -153,19 +208,26 @@ function loadTaskForEdit() {
     );
 
     const task = tasks.find(t => t.id === window.currentTaskId);
-    if (!task) return;
+    if (!task) {
+        console.warn("⚠ task not found for edit");
+        return;
+    }
 
     originalTask = task;
 
     document.getElementById("taskTitle").value = task.title || "";
     document.getElementById("taskDescription").value = task.description || "";
-    document.getElementById("dueDate").value = task.dueDateIso || "";
+    document.getElementById("dueDate").value = task.dueDate || "";
 
     currentStatus = task.status;
 
     document.querySelectorAll(".status-badge").forEach(b =>
         b.classList.toggle("selected", b.dataset.status === task.status)
     );
+
+    if (task.assigneeId) {
+        document.getElementById("assigneeSelect").value = task.assigneeId;
+    }
 
     document.querySelector(".form-title").textContent = "EDIT TASK";
 }
@@ -187,29 +249,37 @@ document.querySelectorAll(".status-badge").forEach(badge => {
 ================================ */
 function saveTask() {
 
+    if (!window.javaBridge) {
+        alert("Bridge not ready");
+        return;
+    }
+
     const title = taskTitle.value.trim();
     const description = taskDescription.value.trim();
-    const dueDate = dueDateInput = document.getElementById("dueDate").value;
+    const dueDate = document.getElementById("dueDate").value;
+    const assigneeId = document.getElementById("assigneeSelect").value || null;
 
     if (!title || !dueDate) {
         alert("Title and due date required");
         return;
     }
 
-    // ================= EDIT MODE =================
+    if (!window.currentTeamId || window.currentTeamId <= 0) {
+        alert("Invalid team context");
+        return;
+    }
+
+    // ===== EDIT MODE =====
     if (window.currentTaskId && originalTask) {
 
-        if (title !== originalTask.title) {
+        if (title !== originalTask.title)
             window.javaBridge.updateTaskTitle(window.currentTaskId, title);
-        }
 
-        if (description !== (originalTask.description || "")) {
+        if (description !== (originalTask.description || ""))
             window.javaBridge.updateTaskDescription(window.currentTaskId, description);
-        }
 
-        if (dueDate !== originalTask.dueDateIso) {
+        if (dueDate !== originalTask.dueDate)
             window.javaBridge.updateTaskDueDate(window.currentTaskId, dueDate);
-        }
 
         if (currentStatus !== originalTask.status) {
             const action =
@@ -223,22 +293,17 @@ function saveTask() {
         return;
     }
 
-    // ================= CREATE MODE =================
+    // ===== CREATE MODE =====
     window.javaBridge.createTask(
         title,
         description,
         window.currentTeamId,
         dueDate,
-        null
+        assigneeId ? parseInt(assigneeId) : null
     );
 
     window.java.openTasks(window.currentTeamId);
 }
-
-/* ===============================
-   INIT
-================================ */
-document.addEventListener("DOMContentLoaded", loadTaskForEdit);
 </script>
 
 </body>

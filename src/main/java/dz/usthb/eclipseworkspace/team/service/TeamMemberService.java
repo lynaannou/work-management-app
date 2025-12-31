@@ -1,8 +1,10 @@
 package dz.usthb.eclipseworkspace.team.service;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
+import dz.usthb.eclipseworkspace.team.DTO.TeamMemberView;
 import dz.usthb.eclipseworkspace.team.dao.TeamMemberDao;
 import dz.usthb.eclipseworkspace.team.exceptions.PermissionException;
 import dz.usthb.eclipseworkspace.team.model.PermissionRequest;
@@ -92,6 +94,48 @@ public class TeamMemberService extends TeamSubject {
         System.out.println(" Membre ajouté avec succès: " + newMember);
         return newMember;
     }
+  public List<TeamMemberView> getTeamMembersView(Long teamId) throws SQLException {
+
+    System.out.println("🟩 [TeamMemberService] getTeamMembersView ENTER");
+    System.out.println("🟩 [TeamMemberService] teamId = " + teamId);
+
+    if (teamId == null) {
+        System.err.println("❌ [TeamMemberService] teamId is NULL");
+        return List.of();
+    }
+
+    if (teamId <= 0) {
+        System.err.println("❌ [TeamMemberService] teamId is INVALID: " + teamId);
+        return List.of();
+    }
+
+    System.out.println("🟩 [TeamMemberService] calling DAO.findTeamMembersView...");
+
+    List<TeamMemberView> views = teamMemberDao.findTeamMembersView(teamId);
+
+    System.out.println("🟩 [TeamMemberService] DAO returned " + views.size() + " members");
+
+    if (views.isEmpty()) {
+        System.out.println("⚠️ [TeamMemberService] NO TEAM MEMBERS FOUND");
+    } else {
+        for (TeamMemberView v : views) {
+            System.out.println(
+                "🟩 [TeamMemberService] MEMBER → "
+                + "teamMemberId=" + v.getTeamMemberId()
+                + ", userId=" + v.getUserId()
+                + ", name=" + v.getFirstName() + " " + v.getLastName()
+                + ", role=" + v.getRole()
+                + ", taskCount=" + v.getTaskCount()
+            );
+        }
+    }
+
+    System.out.println("🟩 [TeamMemberService] getTeamMembersView EXIT");
+
+    return views;
+}
+
+
     
     public boolean removeMember(AppUser requester, Long teamMemberId) throws Exception {
         validateAppUser(requester, "demandeur");

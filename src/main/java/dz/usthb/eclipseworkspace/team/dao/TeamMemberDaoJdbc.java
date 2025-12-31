@@ -1,5 +1,6 @@
 package dz.usthb.eclipseworkspace.team.dao;
 
+import dz.usthb.eclipseworkspace.team.DTO.TeamMemberView;
 import dz.usthb.eclipseworkspace.team.model.TeamMember;
 import dz.usthb.eclipseworkspace.config.DBConnection;
 import java.sql.*;
@@ -300,4 +301,89 @@ public void deleteByTeamId(Long teamId) throws SQLException {
         member.setTaskCount(rs.getInt("task_count"));
         return member;
     }
+    @Override
+public List<TeamMemberView> findTeamMembersView(Long teamId) throws SQLException {
+
+    System.out.println("🟥 DAO.findTeamMembersView ENTER teamId=" + teamId);
+
+    String sql = """
+        SELECT
+            tm.team_member_id,
+            tm.user_id,
+            tm.role,
+            COALESCE(COUNT(t.task_id), 0) AS task_count,
+            u.first_name,
+            u.last_name
+        FROM team_member tm
+        JOIN app_user u ON u.user_id = tm.user_id
+        LEFT JOIN task t ON t.team_member_id = tm.team_member_id
+        WHERE tm.team_id = ?
+        GROUP BY tm.team_member_id, u.first_name, u.last_name
+        ORDER BY tm.role DESC, tm.added_at
+    """;
+
+    List<TeamMemberView> result = new ArrayList<>();
+
+    try (Connection conn = DBConnection.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        System.out.println("🟥 DAO SQL prepared");
+
+        ps.setLong(1, teamId);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            int rowCount = 0;
+
+            while (rs.next()) {
+                rowCount++;
+
+                TeamMemberView v = new TeamMemberView();
+                v.setTeamMemberId(rs.getLong("team_member_id"));
+                v.setUserId(rs.getLong("user_id"));
+                v.setFirstName(rs.getString("first_name"));
+                v.setLastName(rs.getString("last_name"));
+                v.setRole(rs.getString("role"));
+                v.setTaskCount(rs.getInt("task_count"));
+
+                System.out.println("🟥 DAO ROW " + rowCount + " → "
+                        + v.getFirstName() + " " + v.getLastName()
+                        + " (" + v.getRole() + ")");
+
+                result.add(v);
+            }
+
+            System.out.println("🟥 DAO RESULT SIZE=" + result.size());
+        }
+    }
+
+    return result;
+}
+@Override
+public boolean belongsToTeam(Long teamMemberId, Long teamId) throws SQLException {
+
+    System.out.println("🔍 [TeamMemberDaoJdbc] belongsToTeam()");
+    System.out.println("   teamMemberId=" + teamMemberId);
+    System.out.println("   teamId=" + teamId);
+
+    String sql = """
+        SELECT 1
+        FROM team_member
+        WHERE team_member_id = ?
+          AND team_id = ?
+    """;
+
+    try (Connection conn = DBConnection.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setLong(1, teamMemberId);
+        ps.setLong(2, teamId);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            boolean exists = rs.next();
+            System.out.println("   result=" + exists);
+            return exists;
+        }
+    }
+}
+
 }

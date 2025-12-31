@@ -8,6 +8,7 @@ import dz.usthb.eclipseworkspace.workspace.controller.WorkspaceController;
 import dz.usthb.eclipseworkspace.workspace.service.WorkspaceService;
 import dz.usthb.eclipseworkspace.task.controller.TaskController;
 import dz.usthb.eclipseworkspace.todo.controller.TodoController;
+import dz.usthb.eclipseworkspace.team.controller.TeamController;
 import dz.usthb.eclipseworkspace.workspace.service.builder.WorkspaceDashboard;
 import javafx.application.Platform;
 import javafx.concurrent.Worker;
@@ -27,13 +28,11 @@ public class MainController {
     private final WorkspaceController workspaceController;
     private final TodoController todoController;
     private final TaskController taskController;
+    private final TeamController teamController;
 
     private JavaBridge javaBridge;
 
-    // 🔒 REMEMBERS LAST OPENED WORKSPACE
     private Integer lastWorkspaceId = null;
-
-    // 🔒 used ONLY for edit-task navigation
     private Integer pendingTaskId = null;
 
     public MainController(
@@ -43,7 +42,8 @@ public class MainController {
             WorkspaceService workspaceService,
             WorkspaceController workspaceController,
             TodoController todoController,
-            TaskController taskController
+            TaskController taskController,
+            TeamController teamController
     ) {
         this.webView = webView;
         this.webEngine = webView.getEngine();
@@ -53,6 +53,7 @@ public class MainController {
         this.workspaceController = workspaceController;
         this.todoController = todoController;
         this.taskController = taskController;
+        this.teamController = teamController;
         initialize();
     }
 
@@ -84,44 +85,45 @@ public class MainController {
             loadPage("register.html");
         }
     }
-    // ===============================
-// WORKSPACE DASHBOARD INJECTION
-// ===============================
-private void injectWorkspaceDashboard() {
-
-    if (lastWorkspaceId == null) {
-        System.err.println("❌ No workspace selected, cannot load dashboard");
-        return;
-    }
+    /* ===============================
+   WORKSPACE – DELETE
+=============================== */
+public void deleteWorkspace(int teamId) {
+    System.out.println("🗑 Deleting workspace teamId=" + teamId);
 
     try {
-        System.out.println("📤 Injecting dashboard for workspaceId=" + lastWorkspaceId);
+        workspaceController.deleteWorkspace(teamId);
 
-        WorkspaceDashboard dashboard =
-                workspaceService.getDashboard(lastWorkspaceId);
+        // reset context
+        lastWorkspaceId = null;
 
-        String json = GsonProvider.get().toJson(dashboard);
-
-        webEngine.executeScript(
-                // 🔑 REQUIRED BY DELETE BUTTON
-                "window.currentTeamId = " + lastWorkspaceId + ";" +
-
-                "if (typeof window.loadDashboard === 'function') {" +
-                "   window.loadDashboard(" + json + ");" +
-                "} else {" +
-                "   console.error('loadDashboard is not defined');" +
-                "}"
-        );
+        // go back to projects list
+        goProjects();
 
     } catch (Exception e) {
+        System.err.println("❌ Failed to delete workspace");
         e.printStackTrace();
     }
+}
+/* ===============================
+   TASKS – CREATE
+=============================== */
+public void openNewTaskForm(int teamId) {
+    System.out.println("➕ Opening NEW TASK form for teamId=" + teamId);
+
+    // remember workspace
+    lastWorkspaceId = teamId;
+
+    // no pendingTaskId → create mode
+    pendingTaskId = null;
+
+    loadPage("task-form.html");
 }
 
 
 
     /* ===============================
-       JAVA ↔ JS BRIDGE
+       BRIDGE
     =============================== */
     private void exposeBridge() {
         JSObject window = (JSObject) webEngine.executeScript("window");
@@ -133,7 +135,8 @@ private void injectWorkspaceDashboard() {
                     userService,
                     workspaceController,
                     todoController,
-                    taskController
+                    taskController,
+                    teamController
             );
         }
 
@@ -144,7 +147,7 @@ private void injectWorkspaceDashboard() {
     }
 
     /* ===============================
-       PAGE LOAD DISPATCHER (FIXED)
+       PAGE DISPATCHER
     =============================== */
     private void handlePageLoad() {
 
@@ -164,77 +167,93 @@ private void injectWorkspaceDashboard() {
             injectTeamForTasks();
             return;
         }
+
         if (location.endsWith("workspace.html")) {
-        injectWorkspaceDashboard();   // ✅ MISSING CALL
+            injectWorkspaceDashboard();
+            return;
+        }
+
+        if (location.endsWith("task-form.html")) {
+            injectTaskContext();
+        }
+    }
+    private void injectTaskContext() {
+
+    if (lastWorkspaceId == null) {
+        System.err.println("❌ injectTaskContext: lastWorkspaceId is null");
         return;
     }
 
-        if (location.endsWith("task-form.html")) {
-            injectTaskForEdit();
-        }
+    System.out.println("🟦 injectTaskContext teamId=" + lastWorkspaceId
+            + ", taskId=" + pendingTaskId);
+
+    if (pendingTaskId != null) {
+        webEngine.executeScript(
+            "window.currentTeamId=" + lastWorkspaceId + ";" +
+            "window.currentTaskId=" + pendingTaskId + ";" +
+            "if (typeof loadTaskForEdit === 'function') loadTaskForEdit();"
+        );
+    } else {
+        webEngine.executeScript(
+            "window.currentTeamId=" + lastWorkspaceId + ";" +
+            "if (typeof loadTeamMembers === 'function') loadTeamMembers();"
+        );
     }
+}
+
 
     /* ===============================
-       PROJECT LIST
+       PROJECTS
     =============================== */
     private void loadProjects() {
         try {
             Long userId = Session.getInstance().getUserId();
-            System.out.println("📦 Loading dashboards for user " + userId);
-
             List<WorkspaceDashboard> dashboards =
                     workspaceService.getDashboardsForUser(userId.intValue());
 
             String json = GsonProvider.get().toJson(dashboards);
 
             webEngine.executeScript(
-                    "window.currentUserId=" + userId + ";" +
-                    "if (typeof loadProjects === 'function') { loadProjects(" + json + "); }"
+                    "window.currentUserId=" + userId +
+                    "; if (typeof loadProjects === 'function') loadProjects(" + json + ");"
             );
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     /* ===============================
-       WORKSPACE NAVIGATION
+       WORKSPACE
     =============================== */
-
-    // 🔹 Open a workspace AND remember it
     public void openWorkspace(int teamId) {
-        this.lastWorkspaceId = teamId;
-        System.out.println("📌 Stored lastWorkspaceId = " + teamId);
+        lastWorkspaceId = teamId;
         loadPage("workspace.html");
     }
 
-    // 🔹 Go BACK to the workspace we came from
-    public void goToWorkspace() {
+    private void injectWorkspaceDashboard() {
+        if (lastWorkspaceId == null) return;
 
-        if (lastWorkspaceId == null) {
-            System.err.println("⚠ No workspace to return to — going to projects");
-            goProjects();
-            return;
+        try {
+            WorkspaceDashboard dashboard =
+                    workspaceService.getDashboard(lastWorkspaceId);
+
+            String json = GsonProvider.get().toJson(dashboard);
+
+            webEngine.executeScript(
+                    "window.currentTeamId=" + lastWorkspaceId +
+                    "; if (typeof loadDashboard === 'function') loadDashboard(" + json + ");"
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        System.out.println("↩ Returning to workspace " + lastWorkspaceId);
-        openWorkspace(lastWorkspaceId);
     }
 
-    /* ===============================
-       EDIT PROJECT
-    =============================== */
-
-    // 🔹 From workspace → edit-project.html
-    public void editProject() {
-
+    public void goToWorkspace() {
         if (lastWorkspaceId == null) {
-            System.err.println("⚠ editProject called with no workspace context");
-            return;
+            goProjects();
+        } else {
+            openWorkspace(lastWorkspaceId);
         }
-
-        System.out.println("✏ Opening edit-project for workspace " + lastWorkspaceId);
-        loadPage("edit-project.html");
     }
 
     /* ===============================
@@ -244,18 +263,45 @@ private void injectWorkspaceDashboard() {
         try {
             Long userId = Session.getInstance().getUserId();
             String todosJson = todoController.loadTodosJson(userId);
-
-            webEngine.executeScript(
-                    "if (typeof loadTodoList === 'function') { loadTodoList(" + todosJson + "); }"
-            );
-
+            webEngine.executeScript("loadTodoList(" + todosJson + ");");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void goTasks() {
-        loadPage("index.html");
+    /* ===============================
+       TASKS
+    =============================== */
+    public void openTasksForProject(int teamId) {
+        lastWorkspaceId = teamId;
+        loadPage("track_tasks.html");
+    }
+
+    private void injectTeamForTasks() {
+        if (lastWorkspaceId == null) return;
+
+        webEngine.executeScript(
+                "window.currentTeamId=" + lastWorkspaceId +
+                "; if (typeof loadTasks === 'function') loadTasks();"
+        );
+    }
+
+    public void openEditTask(int teamId, int taskId) {
+        lastWorkspaceId = teamId;
+        pendingTaskId = taskId;
+        loadPage("task-form.html");
+    }
+
+    private void injectTaskForEdit() {
+        if (lastWorkspaceId == null || pendingTaskId == null) return;
+
+        webEngine.executeScript(
+                "window.currentTeamId=" + lastWorkspaceId +
+                "; window.currentTaskId=" + pendingTaskId +
+                "; if (typeof loadTaskForEdit === 'function') loadTaskForEdit();"
+        );
+
+        pendingTaskId = null;
     }
 
     /* ===============================
@@ -266,91 +312,24 @@ private void injectWorkspaceDashboard() {
             String url = getClass()
                     .getResource("/ressources/view/" + page)
                     .toExternalForm();
-
-            System.out.println("Loading page: " + url);
             webEngine.load(url);
         });
     }
 
     public void openNewProject() {
-        System.out.println("➕ Opening NEW PROJECT page");
         loadPage("project-form.html");
     }
 
     public void goProjects() {
-        System.out.println("⬅ Navigating to PROJECTS");
         loadPage("projects.html");
+    }
+
+    public void goTasks() {
+        loadPage("index.html");
     }
 
     public void logout() {
         Session.getInstance().clear();
         loadPage("register.html");
     }
-
-    /* ===============================
-       TASKS PER PROJECT
-    =============================== */
-    public void openTasksForProject(int teamId) {
-        this.lastWorkspaceId = teamId;
-        System.out.println("📋 Opening tasks for teamId = " + teamId);
-        loadPage("track_tasks.html");
-    }
-
-    private void injectTeamForTasks() {
-        if (lastWorkspaceId == null) return;
-
-        System.out.println("📤 Injecting currentTeamId into JS = " + lastWorkspaceId);
-
-        webEngine.executeScript(
-                "window.currentTeamId = " + lastWorkspaceId + ";" +
-                "if (typeof loadTasks === 'function') { loadTasks(); }"
-        );
-    }
-
-    /* ===============================
-       EDIT TASK (FIXED & SAFE)
-    =============================== */
-    public void openEditTask(int teamId, int taskId) {
-
-        this.lastWorkspaceId = teamId;
-        this.pendingTaskId = taskId;
-
-        System.out.println("✏️ Opening edit task page for taskId = " + taskId);
-
-        loadPage("task-form.html");
-    }
-
-    private void injectTaskForEdit() {
-        if (lastWorkspaceId == null || pendingTaskId == null) return;
-
-        System.out.println(
-                "📤 Injecting teamId=" + lastWorkspaceId +
-                " taskId=" + pendingTaskId
-        );
-
-        webEngine.executeScript(
-                "window.currentTeamId = " + lastWorkspaceId + ";" +
-                "window.currentTaskId = " + pendingTaskId + ";" +
-                "if (typeof loadTaskForEdit === 'function') { loadTaskForEdit(); }"
-        );
-
-        pendingTaskId = null; // ✅ prevent double injection
-    }
-public void deleteWorkspace(int teamId) {
-    System.out.println("🟢 MainController.deleteWorkspace teamId=" + teamId);
-
-    try {
-        workspaceController.deleteWorkspace(teamId);
-        lastWorkspaceId = null;
-
-        System.out.println("🟢 Workspace deleted, returning to projects");
-
-        goProjects();
-    } catch (Exception e) {
-        System.err.println("🔴 MainController.deleteWorkspace FAILED");
-        e.printStackTrace();
-    }
-}
-
-
 }

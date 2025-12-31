@@ -1,5 +1,6 @@
 package dz.usthb.eclipseworkspace.team.dao;
 
+import dz.usthb.eclipseworkspace.team.DTO.TeamMemberView;
 import dz.usthb.eclipseworkspace.team.model.TeamMember;
 
 import java.sql.SQLException;
@@ -36,4 +37,6 @@ public interface TeamMemberDao {
     Optional<TeamMember> findLeaderByTeamId(Long teamId) throws SQLException;
 
     String getRoleByUserId(Long userId) throws SQLException;
+    List<TeamMemberView> findTeamMembersView(Long teamId) throws SQLException;
+    boolean belongsToTeam(Long teamMemberId, Long teamId) throws SQLException;
 }

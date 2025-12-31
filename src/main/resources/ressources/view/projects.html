@@ -122,7 +122,7 @@ function loadProjects(data) {
       </td>
 
       <td class="col-center">
-        <button class="btn">
+        <button class="btn" onclick="openTasksForProject(${ws.workspace.teamId})">
           SEE TASKS
         </button>
       </td>
@@ -168,6 +168,20 @@ function goDashboard() {
 function goTasks() {
   if (window.java && window.java.goTasks) {
     window.java.goTasks();
+  } else {
+    console.error("❌ java.goTasks not available");
+  }
+}
+
+</script>
+<script>
+function openTasksForProject(teamId) {
+  console.log("🟦 JS openTasksForProject teamId =", teamId);
+
+  if (window.javaBridge && window.javaBridge.openTasksForProject) {
+    window.javaBridge.openTasksForProject(teamId);
+  } else {
+    console.error("❌ javaBridge.openTasksForProject not available");
   }
 }
 </script>

@@ -72,6 +72,6 @@ public final class TeamMember {
     public void setAddedAt(Date date) {
         this.addedAt = date;
     }
-
+    
 
 }

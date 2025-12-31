@@ -1,11 +1,13 @@
 package dz.usthb.eclipseworkspace.task.controller;
 
+import com.google.gson.Gson;
 import dz.usthb.eclipseworkspace.common.json.GsonProvider;
 import dz.usthb.eclipseworkspace.task.model.Task;
 import dz.usthb.eclipseworkspace.task.service.TaskService;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public class TaskController {
 
@@ -17,7 +19,7 @@ public class TaskController {
     }
 
     // ==========================
-    // CREATE TASK
+    // CREATE TASK (FORM BASED)
     // ==========================
     public boolean createTask(
             String title,
@@ -31,6 +33,11 @@ public class TaskController {
 
         try {
             Task task = new Task(title, description, teamId);
+
+            // 🔒 business defaults
+            task.setStateFromString("TODO");
+            task.setStartDate(LocalDate.now());
+            task.setProgressPct(0);
 
             if (dueDate != null && !dueDate.isBlank()) {
                 task.setDueDate(LocalDate.parse(dueDate));
@@ -49,6 +56,27 @@ public class TaskController {
             e.printStackTrace();
             return false;
         }
+    }
+
+    // ==========================
+    // CREATE TASK (JSON – JS)
+    // ==========================
+    public void createTaskFromJson(String json) {
+
+        System.out.println("🟨 [TaskController] createTaskFromJson");
+
+        // Parse JSON → Map
+        Map<String, Object> data =
+                GsonProvider.get().fromJson(json, Map.class);
+
+        Task task = TaskJsonSerializer.fromJson(data);
+
+        // 🔒 FORCE BUSINESS RULES
+        task.setStateFromString("TODO");
+        task.setStartDate(LocalDate.now());
+        task.setProgressPct(0);
+
+        taskService.createTask(task);
     }
 
     // ==========================
@@ -96,7 +124,7 @@ public class TaskController {
     }
 
     // ==========================
-    // CHANGE TASK STATUS (STATUS ONLY)
+    // CHANGE TASK STATUS
     // ==========================
     public boolean changeStatus(int taskId, String action) {
         try {
@@ -109,7 +137,7 @@ public class TaskController {
     }
 
     // =====================================================
-    // 🔥 NEW — EDIT TASK (FULL FORM SAVE)
+    // EDIT TASK (FULL FORM SAVE)
     // =====================================================
     public boolean updateTask(
             int taskId,
@@ -120,10 +148,6 @@ public class TaskController {
     ) {
         try {
             Task task = taskService.getTaskById(taskId);
-
-            if (task == null) {
-                throw new IllegalArgumentException("Task not found");
-            }
 
             if (title != null && !title.isBlank()) {
                 task.setTitle(title);
@@ -151,7 +175,7 @@ public class TaskController {
     }
 
     // =====================================================
-    // ✅ TITLE ONLY
+    // TITLE ONLY
     // =====================================================
     public boolean updateTitle(int taskId, String title) {
         try {
@@ -162,9 +186,19 @@ public class TaskController {
             return false;
         }
     }
+    public String loadTeamMembersAsJson(int teamId) {
+    try {
+        var members = taskService.getTeamMembers(teamId);
+        return GsonProvider.get().toJson(members);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return "[]";
+    }
+}
+
 
     // =====================================================
-    // ✅ DESCRIPTION ONLY
+    // DESCRIPTION ONLY
     // =====================================================
     public boolean updateDescription(int taskId, String description) {
         try {
@@ -177,7 +211,7 @@ public class TaskController {
     }
 
     // =====================================================
-    // ✅ DUE DATE ONLY
+    // DUE DATE ONLY
     // =====================================================
     public boolean updateDueDate(int taskId, String dueDate) {
         try {
