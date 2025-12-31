@@ -57,6 +57,14 @@ public class DaoTodoTask {
     ps.executeUpdate();
     }
 
+    public void deleteItem(int itemId) throws SQLException {
+    String sql = "DELETE FROM todo_item WHERE item_id = ?";
+    PreparedStatement ps = connection.prepareStatement(sql);
+    ps.setInt(1, itemId);
+    ps.executeUpdate();
+    }
+
+
     public void insertTodoItem(
         Long userId,
         String title,
@@ -65,7 +73,20 @@ public class DaoTodoTask {
         String status
 ) throws SQLException {
 
-    String sql = """
+    // Ensure todo exists
+    String ensureTodoSql = """
+        INSERT INTO todo (user_id)
+        VALUES (?)
+        ON CONFLICT (user_id) DO NOTHING
+    """;
+
+    try (PreparedStatement ps = connection.prepareStatement(ensureTodoSql)) {
+        ps.setLong(1, userId);
+        ps.executeUpdate();
+    }
+
+    // Insert todo item
+    String insertSql = """
         INSERT INTO todo_item (todo_id, title, description, due_date, status)
         VALUES (
             (SELECT todo_id FROM todo WHERE user_id = ?),
@@ -73,14 +94,14 @@ public class DaoTodoTask {
         )
     """;
 
-    PreparedStatement ps = connection.prepareStatement(sql);
-    ps.setLong(1, userId);
-    ps.setString(2, title);
-    ps.setString(3, description);
-    ps.setDate(4, dueDate);
-    ps.setString(5, status);
-
-    ps.executeUpdate();
+    try (PreparedStatement ps = connection.prepareStatement(insertSql)) {
+        ps.setLong(1, userId);
+        ps.setString(2, title);
+        ps.setString(3, description);
+        ps.setDate(4, dueDate);
+        ps.setString(5, status);
+        ps.executeUpdate();
+    }
 }
 
 }

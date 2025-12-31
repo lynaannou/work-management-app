@@ -104,7 +104,7 @@ public class TaskController {
         System.out.println("🟨 [TaskController] loadTasksAsJson teamId=" + teamId);
 
         List<Task> tasks = loadTasks(teamId);
-        String json = GsonProvider.get().toJson(tasks);
+        String json = TaskJsonSerializer.toJson(tasks);
 
         System.out.println("🟦 [TaskController] JSON length=" + json.length());
         return json;
@@ -113,15 +113,22 @@ public class TaskController {
     // ==========================
     // DELETE TASK
     // ==========================
-    public boolean deleteTask(int taskId) {
-        try {
-            taskService.deleteTask(taskId);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+   public boolean deleteTaskById(int taskId) {
+    System.out.println("🟥🟥🟥 [TaskController] deleteTaskById()");
+    System.out.println("➡️ taskId=" + taskId);
+
+    try {
+        taskService.deleteTask(taskId);
+        System.out.println(" [TaskController] delete SUCCESS");
+        return true;
+    } catch (Exception e) {
+        System.err.println(" [TaskController] delete FAILED");
+        e.printStackTrace();
+        return false;
     }
+}
+
+
 
     // ==========================
     // CHANGE TASK STATUS

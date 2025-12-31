@@ -8,7 +8,7 @@
     <!-- ================== STYLES (UNCHANGED) ================== -->
     <style>
         :root {
-            --primary: #4A6FA5;
+            --primary: #0078D4;
             --secondary: #6B8EBB;
             --light: #F8F9FA;
             --dark: #343A40;
@@ -26,7 +26,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0078D4 0%, #ffffff 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -147,7 +147,7 @@
     <button
         onclick="addTask()"
         style="
-            background:#4A6FA5;
+            background:#2563eb;
             color:white;
             border:none;
             padding:10px 16px;
@@ -179,11 +179,11 @@
 function goProjects() {
     window.java?.goProjects?.();
 }
+
 let currentTasks = [];
 
 /* ---------- LOAD TASKS ---------- */
 function loadTasks() {
-
     if (!window.currentTeamId) {
         console.warn("⏳ Waiting for currentTeamId...");
         return;
@@ -194,9 +194,8 @@ function loadTasks() {
 
         const json = window.javaBridge.loadTasksAsJson(window.currentTeamId);
         console.log("RAW JSON FROM JAVA =", json);
+
         currentTasks = JSON.parse(json);
-
-
         renderTasks();
 
     } catch (e) {
@@ -211,8 +210,7 @@ function renderTasks() {
     const tbody = document.getElementById("tasksTableBody");
 
     if (!currentTasks || currentTasks.length === 0) {
-        tbody.innerHTML =
-            `<tr><td colspan="5">No tasks yet</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5">No tasks yet</td></tr>`;
         return;
     }
 
@@ -227,31 +225,44 @@ function renderTasks() {
                 </span>
             </td>
             <td>
-                <button class="action-btn edit-btn" onclick="editTask(${t.id})">Edit</button>
-                <button class="action-btn delete-btn" onclick="deleteTask(${t.id})">Delete</button>
+                <button class="action-btn edit-btn"
+                        onclick="editTask(${t.id})">
+                    Edit
+                </button>
+                <button class="action-btn delete-btn"
+                        onclick="deleteTask(${t.id})">
+                    Delete
+                </button>
             </td>
         </tr>
     `).join("");
 }
 
-/* ---------- ACTIONS ---------- */
-function editTask(taskId) {
-    if (window.javaBridge && window.javaBridge.openEditTask) {
-        window.javaBridge.openEditTask(window.currentTeamId, taskId);
+/* ---------- DELETE TASK (SINGLE SOURCE OF TRUTH) ---------- */
+function deleteTask(id) {
+    alert("DELETE CLICKED: " + id);
+    if (!confirm("Delete this task?")) return;
+
+    const ok = window.javaBridge.deleteTaskById(id);
+
+    if (ok) {
+        loadTasks(); // refresh UI
     } else {
-        console.error("❌ openEditTask not available");
+        alert("❌ Delete failed");
     }
 }
 
 
+/* ---------- EDIT TASK ---------- */
+function editTask(taskId) {
+    console.log("✏️ Edit task", taskId);
 
-function deleteTask(id) {
-    if (!confirm("Delete this task?")) return;
-    window.javaBridge.deleteTask(id);
-    loadTasks();
+    if (window.javaBridge?.openEditTask) {
+        window.javaBridge.openEditTask(window.currentTeamId, taskId);
+    }
 }
 
-/* ---------- SAFE INIT (JavaFX FIX) ---------- */
+/* ---------- SAFE INIT (JavaFX) ---------- */
 function waitForTeamId() {
     if (window.currentTeamId && window.javaBridge) {
         loadTasks();
@@ -261,19 +272,20 @@ function waitForTeamId() {
 }
 
 document.addEventListener("DOMContentLoaded", waitForTeamId);
+
+/* ---------- ADD TASK ---------- */
 function addTask() {
     if (!window.currentTeamId) {
         alert("No project selected");
         return;
     }
 
-    if (window.javaBridge && window.javaBridge.openNewTaskForm) {
+    if (window.javaBridge?.openNewTaskForm) {
         window.javaBridge.openNewTaskForm(window.currentTeamId);
     } else {
         console.error("❌ openNewTaskForm not available");
     }
 }
-
 </script>
 
 </body>

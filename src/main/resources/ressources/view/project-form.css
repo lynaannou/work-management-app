@@ -171,20 +171,7 @@ body {
   background: #16a34a;
 }
 
-.btn-delete {
-  background: #ef4444;
-  color: white;
-  border: none;
-  padding: 14px 28px;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 10px;
-  cursor: pointer;
-}
 
-.btn-delete:hover {
-  background: #dc2626;
-}
 /* =========================
    PAGE ACTIONS
 ========================= */

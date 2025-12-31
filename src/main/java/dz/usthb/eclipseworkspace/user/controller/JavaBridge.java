@@ -54,42 +54,42 @@ public class JavaBridge {
         System.out.println("✓ JavaBridge initialized");
     }
     // =====================================================
-// REGISTER
-// =====================================================
- public String register(String email, String firstName, String lastName, String password) {
-        System.out.println("=== REGISTER METHOD CALLED ===");
-        System.out.println("Email: " + email);
+    // REGISTER
+    // =====================================================
+    public String register(String email, String firstName, String lastName, String password) {
+            System.out.println("=== REGISTER METHOD CALLED ===");
+            System.out.println("Email: " + email);
 
-        try {
-            if (email == null || email.trim().isEmpty()) {
-                return "ERROR: Email is required";
+            try {
+                if (email == null || email.trim().isEmpty()) {
+                    return "ERROR: Email is required";
+                }
+                if (firstName == null || firstName.trim().isEmpty()) {
+                    return "ERROR: First name is required";
+                }
+                if (lastName == null || lastName.trim().isEmpty()) {
+                    return "ERROR: Last name is required";
+                }
+                if (password == null || password.trim().isEmpty()) {
+                    return "ERROR: Password is required";
+                }
+
+                User user = new User();
+                user.setEmail(email.trim().toLowerCase());
+                user.setFirstName(firstName.trim());
+                user.setLastName(lastName.trim());
+
+                authService.register(user, password.trim());
+
+                System.out.println("✓ REGISTRATION SUCCESSFUL");
+                return "SUCCESS";
+
+            } catch (Exception e) {
+                System.err.println("✗ Registration failed: " + e.getMessage());
+                e.printStackTrace();
+                return "ERROR: " + (e.getMessage() != null ? e.getMessage() : "Registration failed");
             }
-            if (firstName == null || firstName.trim().isEmpty()) {
-                return "ERROR: First name is required";
-            }
-            if (lastName == null || lastName.trim().isEmpty()) {
-                return "ERROR: Last name is required";
-            }
-            if (password == null || password.trim().isEmpty()) {
-                return "ERROR: Password is required";
-            }
-
-            User user = new User();
-            user.setEmail(email.trim().toLowerCase());
-            user.setFirstName(firstName.trim());
-            user.setLastName(lastName.trim());
-
-            authService.register(user, password.trim());
-
-            System.out.println("✓ REGISTRATION SUCCESSFUL");
-            return "SUCCESS";
-
-        } catch (Exception e) {
-            System.err.println("✗ Registration failed: " + e.getMessage());
-            e.printStackTrace();
-            return "ERROR: " + (e.getMessage() != null ? e.getMessage() : "Registration failed");
         }
-    }
 
 
     // =====================================================
@@ -114,6 +114,7 @@ public class JavaBridge {
         return "{\"success\":true}";
     }
 
+    
     // =====================================================
     // PROJECTS
     // =====================================================
@@ -200,10 +201,17 @@ public void openNewTaskForm(int teamId) {
         mainController.goToWorkspace();
     }
 
-    public void deleteTask(int taskId) {
-        taskController.deleteTask(taskId);
-        mainController.goToWorkspace();
-    }
+public boolean deleteTaskById(int taskId) {
+    System.out.println("🟥 [JavaBridge] deleteTaskById ENTER taskId=" + taskId);
+
+    boolean result = taskController.deleteTaskById(taskId);
+
+    System.out.println("🟥 [JavaBridge] deleteTaskById EXIT result=" + result);
+    return result;
+}
+
+
+
 
     // =====================================================
     // NAVIGATION
@@ -260,4 +268,48 @@ public void openNewTaskForm(int teamId) {
         if (s == null) return "";
         return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
+    // ===== TODO1 =====
+    public void addTodo(String title, String description, String dueDate, String status) {
+    try {
+        todoController.addTodo(title, description, dueDate, status);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    }
+
+    public void deleteTodo(int itemId) {
+        try {
+            todoController.deleteTodo(itemId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public String getUsername() {
+    Session session = Session.getInstance();
+    if (!session.isAuthenticated()) return "";
+
+    return session.getCurrentUser().getFirstName()
+           + " "
+           + session.getCurrentUser().getLastName();
+    }
+
+    // ===== TODO2 =====
+    public String loadMyTodos() {
+        try {
+            Long userId = Session.getInstance().getUserId();
+            return todoController.loadTodosJson(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "{\"progress\":0,\"tasks\":[]}";
+        }
+    }
+
+    public void changeTodoStatus(int taskId, String status) {
+        try {
+            todoController.changeStatus(taskId, status);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

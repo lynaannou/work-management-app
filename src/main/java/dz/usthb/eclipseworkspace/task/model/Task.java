@@ -2,16 +2,20 @@ package dz.usthb.eclipseworkspace.task.model;
 
 import java.time.LocalDate;
 
+import com.google.gson.annotations.SerializedName;
+
 import dz.usthb.eclipseworkspace.task.model.state.TaskState;
 import dz.usthb.eclipseworkspace.task.model.state.TodoState;
 import dz.usthb.eclipseworkspace.task.model.state.InProgressState;
 import dz.usthb.eclipseworkspace.task.model.state.DoneState;
 import dz.usthb.eclipseworkspace.task.model.state.CancelledState;
 
+
 public class Task {
 
     /* ===================== DB FIELDS ===================== */
 
+    @SerializedName("id")
     private int id;                     // task_id (PK)
     private int teamId;                 // team_id (FK)
     private Integer assigneeId;          // team_member_id (FK, nullable)
@@ -34,7 +38,7 @@ public class Task {
 
     private String assigneeFirstName;
     private String assigneeLastName;
-
+    
     /* ===================== CONSTRUCTORS ===================== */
 
     public Task() {
@@ -180,9 +184,12 @@ public class Task {
         return startDate != null ? startDate.toString() : null;
     }
 
+    @SerializedName("dueDate")
     public String getDueDateIso() {
         return dueDate != null ? dueDate.toString() : null;
     }
+
+    
 
     public String getCreatedAtIso() {
         return createdAt != null ? createdAt.toString() : null;
@@ -207,10 +214,6 @@ public void setStateFromString(String status) {
         return completedAt != null ? completedAt.toString() : null;
     }
 
-    // ✅ ID is now safely exposed to frontend
-    public int getIdJson() {
-        return id;
-    }
 
     /* ===================== ASSIGNEE DISPLAY ===================== */
 

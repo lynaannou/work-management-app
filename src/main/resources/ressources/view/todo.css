@@ -1,0 +1,229 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f8f9fb;
+}
+
+/* ===== HEADER ===== */
+header {
+    padding: 18px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+
+}
+
+.logo {
+    font-weight: 700;
+    font-size: 22px;
+    color: #2563eb;
+}
+.left {
+    display: flex;
+    align-items: center;
+    gap: 48px;
+}
+.nav-links {
+  display: flex;
+  gap: 32px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #9ca3af;
+}
+
+.nav-links a.active {
+  color: #000;
+  font-weight: 600;
+}
+
+
+.user {
+    display: flex;
+    align-items: center;
+}
+
+.avatar {
+    width: 35px;
+    height: 35px;
+    background:#0078D417;
+    border-radius: 50%;
+    margin-right: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.avatar img {
+  width: 20px;
+}
+
+/* ===== MAIN ===== */
+main {
+    padding: 40px;
+}
+
+/* ===== PROGRESS ===== */
+.progress-section {
+    margin-bottom: 40px;
+}
+
+.progress-container {
+     width: 80%;
+    height: 60px;
+    background: #e6e6e6;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 10px;
+    border-radius: 45px;
+}
+
+#progressFill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #a6c8ff, #0078d4);
+    transition: width 0.5s ease-in-out;
+    border-radius: 45px;
+}
+
+#progressValue {
+    display: inline-block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+/* ===== TODO TABLE ===== */
+.todo-section {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.562);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+thead {
+    color: #999;
+}
+
+th, td {
+    text-align: left;
+    padding: 15px;
+}
+
+tbody tr {
+    border-top: 1px solid #eee;
+}
+
+.project {
+    font-weight: bold;
+}
+
+/* ===== STATUS ===== */
+select.status {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* COLORS */
+.status.OPEN {
+    background-color: #f0ad4e; /* jaune */
+    color: white;
+}
+
+.status.DONE {
+    background-color: #5cb85c; /* vert */
+    color: white;
+}
+
+.status.CANCELLED {
+    background-color: #d9534f; /* rouge */
+    color: white;
+}
+
+
+.add-todo {
+    margin-top: 40px;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.add-todo h2 {
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #333;
+}
+
+#addTodoForm {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+}
+
+#addTodoForm input,
+#addTodoForm select {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+#addTodoForm button {
+    background: #0078d4;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#addTodoForm button:hover {
+    background: #0078d4;
+}
+
+.status-cell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.delete-btn {
+    opacity: 0;
+    cursor: pointer;
+    color: #000000;;
+    font-size: 16px;
+    transition: opacity 0.2s ease;
+    z-index: 10;
+    position: relative;
+    font-weight: lighter;
+}
+
+tr:hover .delete-btn {
+    opacity: 1;
+}
+
+.delete-btn:hover {
+    transform: scale(1.2);
+}
+
+select.status {
+    position: relative;
+    z-index: 1;
+}

@@ -112,5 +112,30 @@
 </div>
 
 <script src="profile.js"></script>
+<script>
+function initUserContext() {
+
+  if (!window.javaBridge) {
+    setTimeout(initUserContext, 50);
+    return;
+  }
+
+  const raw = window.javaBridge.getCurrentUserInfo();
+  if (!raw || raw === "{}") return;
+
+  try {
+    const user = JSON.parse(raw);
+
+    document.querySelector(".user-name").textContent =
+      user.firstName + " " + user.lastName;
+
+  } catch (e) {
+    console.error("Failed to load user", e);
+  }
+}
+
+initUserContext();
+</script>
+
 </body>
 </html>

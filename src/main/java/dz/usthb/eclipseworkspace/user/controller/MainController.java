@@ -15,6 +15,9 @@ import javafx.concurrent.Worker;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+
 
 import java.util.List;
 
@@ -60,23 +63,32 @@ public class MainController {
     /* ===============================
        INITIALIZATION
     =============================== */
-    private void initialize() {
+private void initialize() {
 
-        webEngine.setOnAlert(e ->
-                System.out.println("JS Alert: " + e.getData())
-        );
+    webEngine.setOnAlert(e ->
+            System.out.println("JS Alert: " + e.getData())
+    );
 
-        webEngine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
-            System.out.println("WebEngine state: " + oldState + " -> " + newState);
+    // ✅ JavaFX confirm() handler
+    webEngine.setConfirmHandler(message -> {
+        System.out.println("JS Confirm: " + message);
+        return showConfirmDialog(message);
+    });
 
-            if (newState == Worker.State.SUCCEEDED) {
-                exposeBridge();
-                handlePageLoad();
-            }
-        });
+    // ✅ ONE listener, ONE time
+    webEngine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+        System.out.println("WebEngine state: " + oldState + " -> " + newState);
 
-        loadInitialPage();
-    }
+        if (newState == Worker.State.SUCCEEDED) {
+            exposeBridge();
+            handlePageLoad();
+        }
+    });
+
+    // ✅ ONE initial load
+    loadInitialPage();
+}
+
 
     private void loadInitialPage() {
         if (Session.getInstance().isAuthenticated()) {
@@ -88,6 +100,17 @@ public class MainController {
     /* ===============================
    WORKSPACE – DELETE
 =============================== */
+private boolean showConfirmDialog(String message) {
+    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+    alert.setTitle("Confirm action");
+    alert.setHeaderText(null);
+    alert.setContentText(message);
+
+    return alert.showAndWait()
+            .filter(ButtonType.OK::equals)
+            .isPresent();
+}
+
 public void deleteWorkspace(int teamId) {
     System.out.println("🗑 Deleting workspace teamId=" + teamId);
 
@@ -159,9 +182,18 @@ public void openNewTaskForm(int teamId) {
         }
 
         if (location.endsWith("index.html")) {
-            loadTodos();
-            return;
-        }
+        loadTodos();
+
+        String username =
+            Session.getInstance().getCurrentUser().getFirstName() + " " +
+            Session.getInstance().getCurrentUser().getLastName();
+
+        webEngine.executeScript(
+            "setUsernameFromJava(" + "\"" + username + "\"" + ");"
+        );
+        return;
+    }
+
 
         if (location.endsWith("track_tasks.html")) {
             injectTeamForTasks();
@@ -177,6 +209,8 @@ public void openNewTaskForm(int teamId) {
             injectTaskContext();
         }
     }
+
+
     private void injectTaskContext() {
 
     if (lastWorkspaceId == null) {
@@ -200,6 +234,15 @@ public void openNewTaskForm(int teamId) {
         );
     }
 }
+public void deleteTask(int taskId) {
+    System.out.println("🟥 [MainController] deleteTask ENTER taskId=" + taskId);
+
+    javaBridge.deleteTaskById(taskId);
+
+    // reload task list
+    openTasksForProject(lastWorkspaceId);
+}
+
 
 
     /* ===============================
@@ -260,14 +303,19 @@ public void openNewTaskForm(int teamId) {
        TODOS
     =============================== */
     private void loadTodos() {
-        try {
-            Long userId = Session.getInstance().getUserId();
-            String todosJson = todoController.loadTodosJson(userId);
-            webEngine.executeScript("loadTodoList(" + todosJson + ");");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    try {
+        Long userId = Session.getInstance().getUserId();
+        String todosJson = todoController.loadTodosJson(userId);
+
+        webEngine.executeScript(
+            "var data = " + todosJson + ";" +
+            "loadTodosFromJava(data.tasks);"
+        );
+
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+}
 
     /* ===============================
        TASKS
@@ -332,4 +380,8 @@ public void openNewTaskForm(int teamId) {
         Session.getInstance().clear();
         loadPage("register.html");
     }
+    public void reloadCurrentPage() {
+    webEngine.reload();
+}
+
 }
