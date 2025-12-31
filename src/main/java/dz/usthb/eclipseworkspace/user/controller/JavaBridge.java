@@ -201,10 +201,11 @@ public void openNewTaskForm(int teamId) {
         mainController.goToWorkspace();
     }
 
-    public void deleteTask(int taskId) {
-        taskController.deleteTask(taskId);
-        mainController.goToWorkspace();
+    public void deleteTaskById(int taskId) {
+    taskController.deleteTaskById(taskId);
+    mainController.reloadCurrentPage();
     }
+
 
     // =====================================================
     // NAVIGATION

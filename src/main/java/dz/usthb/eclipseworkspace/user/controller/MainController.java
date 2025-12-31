@@ -348,4 +348,8 @@ public void openNewTaskForm(int teamId) {
         Session.getInstance().clear();
         loadPage("register.html");
     }
+    public void reloadCurrentPage() {
+    webEngine.reload();
+}
+
 }
