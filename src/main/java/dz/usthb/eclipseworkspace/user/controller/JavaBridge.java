@@ -53,6 +53,44 @@ public class JavaBridge {
 
         System.out.println("✓ JavaBridge initialized");
     }
+    // =====================================================
+// REGISTER
+// =====================================================
+ public String register(String email, String firstName, String lastName, String password) {
+        System.out.println("=== REGISTER METHOD CALLED ===");
+        System.out.println("Email: " + email);
+
+        try {
+            if (email == null || email.trim().isEmpty()) {
+                return "ERROR: Email is required";
+            }
+            if (firstName == null || firstName.trim().isEmpty()) {
+                return "ERROR: First name is required";
+            }
+            if (lastName == null || lastName.trim().isEmpty()) {
+                return "ERROR: Last name is required";
+            }
+            if (password == null || password.trim().isEmpty()) {
+                return "ERROR: Password is required";
+            }
+
+            User user = new User();
+            user.setEmail(email.trim().toLowerCase());
+            user.setFirstName(firstName.trim());
+            user.setLastName(lastName.trim());
+
+            authService.register(user, password.trim());
+
+            System.out.println("✓ REGISTRATION SUCCESSFUL");
+            return "SUCCESS";
+
+        } catch (Exception e) {
+            System.err.println("✗ Registration failed: " + e.getMessage());
+            e.printStackTrace();
+            return "ERROR: " + (e.getMessage() != null ? e.getMessage() : "Registration failed");
+        }
+    }
+
 
     // =====================================================
     // AUTH
