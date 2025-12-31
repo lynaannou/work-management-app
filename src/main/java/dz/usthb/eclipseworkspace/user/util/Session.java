@@ -1,7 +1,7 @@
 package dz.usthb.eclipseworkspace.user.util;
 
 import dz.usthb.eclipseworkspace.user.model.User;
-import dz.usthb.eclipseworkspace.user.util.UserRole;
+
 
 public class Session {
 

@@ -26,4 +26,10 @@ public class TeamMemberView {
 
     public Integer getTaskCount() { return taskCount; }
     public void setTaskCount(Integer taskCount) { this.taskCount = taskCount; }
+    public class WorkspaceView {
+    private Long teamId;
+    private String name;
+    private String description; // ✅ MANQUANT
+}
+
 }

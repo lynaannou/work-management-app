@@ -3,7 +3,6 @@ package dz.usthb.eclipseworkspace.workspace.service;
 import dz.usthb.eclipseworkspace.workspace.dao.DaoWorkspace;
 import dz.usthb.eclipseworkspace.task.dao.DaoTask;
 import dz.usthb.eclipseworkspace.workspace.dao.DaoAppUser;
-import dz.usthb.eclipseworkspace.user.util.Session;
 
 import dz.usthb.eclipseworkspace.workspace.model.Workspace;
 import dz.usthb.eclipseworkspace.task.model.Task;

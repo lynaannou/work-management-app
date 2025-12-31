@@ -1,6 +1,5 @@
 package dz.usthb.eclipseworkspace.task.controller;
 
-import com.google.gson.Gson;
 import dz.usthb.eclipseworkspace.common.json.GsonProvider;
 import dz.usthb.eclipseworkspace.task.model.Task;
 import dz.usthb.eclipseworkspace.task.service.TaskService;
