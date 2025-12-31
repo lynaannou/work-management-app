@@ -222,7 +222,7 @@ public void openNewTaskForm(int teamId) {
         if (s == null) return "";
         return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
-        // ===== TODO =====
+    // ===== TODO1 =====
     public void addTodo(String title, String description, String dueDate, String status) {
     try {
         todoController.addTodo(title, description, dueDate, status);
@@ -231,12 +231,41 @@ public void openNewTaskForm(int teamId) {
     }
     }
 
-    public void deleteTodo(int taskId) {
+    public void deleteTodo(int itemId) {
         try {
-            todoController.deleteTodo(taskId);
+            todoController.deleteTodo(itemId);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+    public String getUsername() {
+    Session session = Session.getInstance();
+    if (!session.isAuthenticated()) return "";
+
+    return session.getCurrentUser().getFirstName()
+           + " "
+           + session.getCurrentUser().getLastName();
+    }
+
+    // ===== TODO2 =====
+    public String loadMyTodos() {
+        try {
+            Long userId = Session.getInstance().getUserId();
+            return todoController.loadTodosJson(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "{\"progress\":0,\"tasks\":[]}";
+        }
+    }
+
+    public void changeTodoStatus(int taskId, String status) {
+        try {
+            todoController.changeStatus(taskId, status);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
 }

@@ -42,8 +42,8 @@ public class TodoController {
         e.printStackTrace();
     }
     }
-    public void deleteTodo(int taskId) throws Exception {
-    service.deleteItem(taskId);
+    public void deleteTodo(int itemId) throws Exception {
+    service.deleteItem(itemId);
     }
 
 

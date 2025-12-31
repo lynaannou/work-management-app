@@ -159,9 +159,18 @@ public void openNewTaskForm(int teamId) {
         }
 
         if (location.endsWith("index.html")) {
-            loadTodos();
-            return;
-        }
+        loadTodos();
+
+        String username =
+            Session.getInstance().getCurrentUser().getFirstName() + " " +
+            Session.getInstance().getCurrentUser().getLastName();
+
+        webEngine.executeScript(
+            "setUsernameFromJava(" + "\"" + username + "\"" + ");"
+        );
+        return;
+    }
+
 
         if (location.endsWith("track_tasks.html")) {
             injectTeamForTasks();
@@ -177,6 +186,8 @@ public void openNewTaskForm(int teamId) {
             injectTaskContext();
         }
     }
+
+
     private void injectTaskContext() {
 
     if (lastWorkspaceId == null) {
@@ -265,15 +276,15 @@ public void openNewTaskForm(int teamId) {
         String todosJson = todoController.loadTodosJson(userId);
 
         webEngine.executeScript(
-        "loadTodosFromJava(" + todosJson + ".tasks);"
-    );
-
+            "var data = " + todosJson + ";" +
+            "loadTodosFromJava(data.tasks);"
+        );
 
     } catch (Exception e) {
         e.printStackTrace();
     }
-    
     }
+
     /* ===============================
        TASKS
     =============================== */

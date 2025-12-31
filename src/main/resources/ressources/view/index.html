@@ -13,9 +13,8 @@
     <div class="left">
         <h1 class="logo">ECLIPSEWORK</h1>
     <div class="nav-links">
-        <a href="#" onclick="goDashboard()">DASHBOARD</a>
-        <a href="#">PROJECTS</a>
-        <a href="#" class="active">TASKS</a>
+        <a href="#" onclick="goProjects()">PROJECTS</a>
+        <a href="#" class="active">TODO</a>
     </div>
     </div>
 
@@ -134,7 +133,6 @@ function loadTodoList(tasks) {
    CHANGE STATUS
 ===================== */
 function changeStatus(taskId, newStatus) {
-
     if (window.javaBridge) {
         window.javaBridge.changeTodoStatus(taskId, newStatus);
 
@@ -143,6 +141,7 @@ function changeStatus(taskId, newStatus) {
         loadTodoList(data.tasks);
     }
 }
+
 
 
 
@@ -159,37 +158,52 @@ function addTodo() {
     const dueDate = document.getElementById("newTaskDue").value;
     const status = document.getElementById("newTaskStatus").value;
 
-    if (window.javaBridge) {
-        window.javaBridge.addTodo(title, description, dueDate, status);
+    window.javaBridge.addTodo(title, description, dueDate, status);
 
-        const json = window.javaBridge.loadMyTodos();
-        const data = JSON.parse(json);
-        loadTodoList(data.tasks);
-    }
+    const json = window.javaBridge.loadMyTodos();
+    const data = JSON.parse(json);
+    loadTodoList(data.tasks);
 
     document.getElementById("addTodoForm").reset();
 }
+
 /* =====================
    DELETE TODO
 ===================== */
-function confirmDelete(taskId) {
-    alert("CLICK DETECTED FOR ID = " + taskId);
-    const ok = confirm("Êtes-vous sûr de vouloir supprimer cette tâche ?");
-    if (!ok) return;
+function confirmDelete(itemId) {
+    console.log("DELETE itemId =", itemId);
 
-    if (window.javaBridge) {
-        window.javaBridge.deleteTodo(taskId);
-
-        const json = window.javaBridge.loadMyTodos();
-        const data = JSON.parse(json);
-        loadTodoList(data.tasks);
+    if (!itemId || itemId <= 0) {
+        alert("Invalid item id");
+        return;
     }
+
+    window.javaBridge.deleteTodo(itemId);
+
+    const json = window.javaBridge.loadMyTodos();
+    const data = JSON.parse(json);
+    loadTodoList(data.tasks);
 }
+
 
 
 
 
 </script>
+<script>
+function goProjects() {
+    if (window.java && window.java.goProjects) {
+        window.java.goProjects();
+    }
+}
+
+</script>
+<script>
+function setUsernameFromJava(username) {
+    document.getElementById("userName").textContent = username;
+}
+</script>
+
 
 </body>
 </html>

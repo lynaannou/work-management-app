@@ -6,128 +6,195 @@
     <title>ECLIPSEWORK - Task List</title>
 
     <!-- ================== STYLES (UNCHANGED) ================== -->
-    <style>
-        :root {
-            --primary: #4A6FA5;
-            --secondary: #6B8EBB;
-            --light: #F8F9FA;
-            --dark: #343A40;
-            --success: #28A745;
-            --warning: #FFC107;
-            --danger: #DC3545;
-            --border: #DEE2E6;
-        }
+<style>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
+:root {
+  --blue: #0078D4;
+  --text-main: #323130;
+  --text-secondary: #9B9A98;
 
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+  --success: #2CD787;
+  --danger: #E03336;
+  --warning: #F2C94C;
 
-        .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 15px 30px;
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .table-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px;
-        }
-
-        .tasks-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .tasks-table th {
-            background: var(--primary);
-            color: white;
-            padding: 15px;
-            text-align: left;
-        }
-
-        .tasks-table td {
-            padding: 14px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .status-todo { background:#fff3cd; color:#856404; }
-        .status-inprogress { background:#cce5ff; color:#004085; }
-        .status-done { background:#d4edda; color:#155724; }
-
-        .action-btn {
-            padding: 6px 12px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-        }
-        .back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-
-    margin-bottom: 22px;
-    padding: 6px 14px;
-
-    background: rgba(0, 0, 0, 0.03);
-    color: #333;
-
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 10px;
-
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 500;
-
-    cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  --bg-page: #F3F2F1;
+  --bg-card: #FFFFFF;
+  --border: #D9D9D9;
 }
 
-.back-btn:hover {
-    background: rgba(0, 0, 0, 0.06);
-    color: #000;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", system-ui, sans-serif;
 }
 
-.back-btn:active {
-    transform: translateX(-2px);
+
+body {
+  background: var(--bg-page);
+  min-height: 100vh;
 }
 
-.back-btn::before {
-    content: "←";
-    font-size: 1rem;
-    opacity: 0.6;
+
+.navbar {
+  background: white;
+  border-bottom: 1px solid var(--border);
+  padding: 16px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-        .edit-btn { background:#4A6FA533; color:#4A6FA5; }
-        .delete-btn { background:#dc354533; color:#DC3545; }
-    </style>
+.logo {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+.nav-links {
+  display: flex;
+  gap: 30px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.nav-links a.active {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #E6F2FB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.table-container {
+  background: var(--bg-card);
+  margin: 40px;
+  padding: 24px;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.table-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.sort-controls a {
+  background: var(--blue);
+  color: white;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+
+.tasks-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tasks-table th {
+  background: #F3F2F1;
+  color: var(--text-main);
+  font-size: 12px;
+  text-transform: uppercase;
+  padding: 10px;
+  text-align: left;
+}
+
+.tasks-table td {
+  padding: 12px 10px;
+  font-size: 13px;
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border);
+}
+
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-done::before {
+  background: var(--success);
+}
+
+.status-todo::before {
+  background: var(--danger);
+}
+
+.status-inprogress::before {
+  background: var(--warning);
+}
+
+
+.tasks-table a {
+  color: var(--blue);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+
+.action-buttons button {
+  border: none;
+  background: transparent;
+  color: var(--blue);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+
+@media (max-width: 900px) {
+  .table-container {
+    margin: 20px;
+  }
+
+  .tasks-table {
+    display: block;
+    overflow-x: auto;
+  }
+}
+</style>
 </head>
 
 <body>
