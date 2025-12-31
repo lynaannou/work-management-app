@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>ECLIPSEWORK – My Todo</title>
+    <link rel="stylesheet" href="todo.css">
+</head>
+
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="header">
+    <div class="left">
+        <h1 class="logo">ECLIPSEWORK</h1>
+    <div class="nav-links">
+        <a href="#" onclick="goDashboard()">DASHBOARD</a>
+        <a href="#">PROJECTS</a>
+        <a href="#" class="active">TASKS</a>
+    </div>
+    </div>
+
+    <div class="user">
+        <div class="avatar">
+            <img src="profile.png" alt="user">
+        </div>
+        <span id="userName">Full Name</span>
+    </div>
+</header>
+
+<!-- ===== MAIN ===== -->
+<main class="container">
+
+    <!-- ===== PROGRESS ===== -->
+    <section class="progress-section">
+        <h2>PROGRESSION</h2>
+
+        <div class="progress-container">
+            <div id="progressFill"></div>
+        </div>
+
+        <span id="progressValue">0%</span>
+    </section>
+
+    <!-- ===== TODO TABLE ===== -->
+    <section class="todo-section">
+        <h2>MY TO-DO LIST</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>DESCRIPTION</th>
+                    <th>TASK</th>
+                    <th>DUE</th>
+                    <th>STATUS</th>
+                </tr>
+            </thead>
+            <tbody id="todoBody"></tbody>
+        </table>
+    </section>
+    <!-- ===== ADD TODO ===== -->
+    <section class="add-todo">
+        <h2>ADD A NEW TODO ITEM</h2>
+        <form id="addTodoForm" onsubmit="addTodo(); return false;">
+            <input type="text" id="newTaskTitle" placeholder="Task Title" required>
+            <input type="text" id="newTaskProject" placeholder="Description" required>
+            <input type="date" id="newTaskDue" required>
+            <select id="newTaskStatus">
+                <option value="OPEN">OPEN</option>
+                <option value="CANCELLED">CANCELLED</option>
+                <option value="DONE">DONE</option>
+            </select>
+            <button type="submit">ADD TODO</button>
+        </form>
+    </section> 
+</main>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+let currentTasks = [];
+
+function loadTodosFromJava(tasks) {
+    currentTasks = tasks;
+    loadTodoList(currentTasks);
+}
+
+
+/* =====================
+   LOAD UI
+===================== */
+function loadTodoList(tasks) {
+
+    // Progress
+    const total = tasks.length;
+    const done = tasks.filter(t => t.status === "DONE").length;
+    const percent = total === 0 ? 0 : Math.round((done / total) * 100);
+
+    document.getElementById("progressFill").style.width = percent + "%";
+    document.getElementById("progressValue").textContent = percent + "%";
+
+    // Table
+    const body = document.getElementById("todoBody");
+    body.innerHTML = "";
+
+    tasks.forEach(task => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${task.description}</td>
+            <td>${task.title}</td>
+            <td>${task.due}</td>
+            <td class="status-cell">
+                <select class="status"
+                        onchange="changeStatus(${task.id}, this.value)">
+                    <option value="OPEN">OPEN</option>
+                    <option value="CANCELLED">CANCELLED</option>
+                    <option value="DONE">DONE</option>
+                </select>
+                <span class="delete-btn"
+                onclick="event.stopPropagation(); confirmDelete(${task.id})">✖</span>
+
+
+            </td>
+        `;
+
+        body.appendChild(tr);
+        const select = tr.querySelector("select");
+        select.value = task.status;
+
+        select.classList.add(task.status);
+    });
+}
+
+/* =====================
+   CHANGE STATUS
+===================== */
+function changeStatus(taskId, newStatus) {
+
+    if (window.javaBridge) {
+        window.javaBridge.changeTodoStatus(taskId, newStatus);
+
+        const json = window.javaBridge.loadMyTodos();
+        const data = JSON.parse(json);
+        loadTodoList(data.tasks);
+    }
+}
+
+
+
+
+// Init
+loadTodoList(currentTasks);
+
+/* =====================
+   ADD TODO
+===================== */
+function addTodo() {
+    const title = document.getElementById("newTaskTitle").value;
+    const description = document.getElementById("newTaskProject").value;
+    const dueDate = document.getElementById("newTaskDue").value;
+    const status = document.getElementById("newTaskStatus").value;
+
+    if (window.javaBridge) {
+        window.javaBridge.addTodo(title, description, dueDate, status);
+
+        const json = window.javaBridge.loadMyTodos();
+        const data = JSON.parse(json);
+        loadTodoList(data.tasks);
+    }
+
+    document.getElementById("addTodoForm").reset();
+}
+/* =====================
+   DELETE TODO
+===================== */
+function confirmDelete(taskId) {
+    alert("CLICK DETECTED FOR ID = " + taskId);
+    const ok = confirm("Êtes-vous sûr de vouloir supprimer cette tâche ?");
+    if (!ok) return;
+
+    if (window.javaBridge) {
+        window.javaBridge.deleteTodo(taskId);
+
+        const json = window.javaBridge.loadMyTodos();
+        const data = JSON.parse(json);
+        loadTodoList(data.tasks);
+    }
+}
+
+
+
+
+</script>
+
+</body>
+</html>

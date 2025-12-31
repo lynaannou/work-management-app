@@ -33,6 +33,11 @@ public class TodoService implements TaskSubject {
         dao.updateStatus(taskId, status);
         notifyObservers();
     }
+    public void deleteItem(int itemId) throws Exception {
+    dao.deleteItem(itemId);
+    notifyObservers();
+    }
+
     public void addItem(
         Long userId,
         String title,

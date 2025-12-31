@@ -260,15 +260,20 @@ public void openNewTaskForm(int teamId) {
        TODOS
     =============================== */
     private void loadTodos() {
-        try {
-            Long userId = Session.getInstance().getUserId();
-            String todosJson = todoController.loadTodosJson(userId);
-            webEngine.executeScript("loadTodoList(" + todosJson + ");");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    try {
+        Long userId = Session.getInstance().getUserId();
+        String todosJson = todoController.loadTodosJson(userId);
 
+        webEngine.executeScript(
+        "loadTodosFromJava(" + todosJson + ".tasks);"
+    );
+
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    
+    }
     /* ===============================
        TASKS
     =============================== */

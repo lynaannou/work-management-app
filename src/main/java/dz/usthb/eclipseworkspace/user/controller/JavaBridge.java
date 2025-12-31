@@ -222,4 +222,21 @@ public void openNewTaskForm(int teamId) {
         if (s == null) return "";
         return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
+        // ===== TODO =====
+    public void addTodo(String title, String description, String dueDate, String status) {
+    try {
+        todoController.addTodo(title, description, dueDate, status);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    }
+
+    public void deleteTodo(int taskId) {
+        try {
+            todoController.deleteTodo(taskId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }
