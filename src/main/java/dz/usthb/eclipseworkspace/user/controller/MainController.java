@@ -283,7 +283,7 @@ public void openNewTaskForm(int teamId) {
     } catch (Exception e) {
         e.printStackTrace();
     }
-    }
+}
 
     /* ===============================
        TASKS

@@ -67,14 +67,7 @@ function loadProjects(data) {
     return;
   }
 
-  /* ===============================
-     USER NAME (FROM FIRST DASHBOARD)
-  =============================== */
-  if (data[0].leader) {
-    const leader = data[0].leader;
-    document.querySelector(".user-name").textContent =
-      leader.firstName + " " + leader.lastName;
-  }
+  
 
   const tbody = document.querySelector("#projectsTable tbody");
   tbody.innerHTML = "";
@@ -183,6 +176,30 @@ function openTasksForProject(teamId) {
     console.error("❌ javaBridge.openTasksForProject not available");
   }
 }
+</script>
+<script>
+function initUserContext() {
+
+  if (!window.javaBridge) {
+    setTimeout(initUserContext, 50);
+    return;
+  }
+
+  const raw = window.javaBridge.getCurrentUserInfo();
+  if (!raw || raw === "{}") return;
+
+  try {
+    const user = JSON.parse(raw);
+
+    document.querySelector(".user-name").textContent =
+      user.firstName + " " + user.lastName;
+
+  } catch (e) {
+    console.error("Failed to load user", e);
+  }
+}
+
+initUserContext();
 </script>
 
 </body>
