@@ -23,6 +23,11 @@ window.loadDashboard = function (data) {
         return;
     }
 
+    // ===============================
+    // 🔑 REQUIRED FOR DELETE / EDIT
+    // ===============================
+    window.currentTeamId = data.workspace.teamId;
+    console.log("🧩 currentTeamId SET =", window.currentTeamId);
     /* ===============================
        NAVBAR USER (CURRENT USER)
     =============================== */
@@ -44,6 +49,15 @@ window.loadDashboard = function (data) {
         editBtn.style.display = "inline-flex";
         console.log("✏️ Edit Project enabled");
     }
+    const deleteBtn = document.querySelector(".delete-btn");
+
+if (data.currentUserRole === "LEAD") {
+    if (editBtn) editBtn.style.display = "inline-flex";
+    if (deleteBtn) deleteBtn.style.display = "inline-flex";
+
+    console.log("🗑 Delete Project enabled");
+}
+
 
     /* ===============================
        TITLE
@@ -131,13 +145,21 @@ window.loadDashboard = function (data) {
         <h2 class="workspace-title">Progression</h2>
 
         <div class="workspace-actions">
-            <!-- 🔒 hidden by default -->
             <button
                 class="edit-btn"
                 style="display:none;"
                 onclick="goEditProject()"
             >
                 ✎ Edit Project
+            </button>
+
+            <button
+                type="button"
+                class="delete-btn"
+                style="display:none;"
+                onclick="deleteProject()"
+            >
+                🗑 Delete Project
             </button>
         </div>
     </div>
@@ -150,6 +172,7 @@ window.loadDashboard = function (data) {
         <div class="tasks-list"></div>
     </div>
 </section>
+
 
 <!-- =========================
      NAVIGATION
@@ -171,6 +194,27 @@ function goTasks() {
 function goEditProject() {
     console.log("✏ Edit Project clicked");
     window.java?.editProject?.();
+}
+</script>
+
+<script>
+    function goTasks() {
+        if (window.javaBridge) {
+            window.javaBridge.goTasks();
+        }
+    }
+
+
+function deleteProject() {
+    console.log("🟡 deleteProject() clicked");
+    console.log("🟡 window.currentTeamId =", window.currentTeamId);
+
+    if (!window.javaBridge || !window.javaBridge.deleteWorkspace) {
+        console.error("❌ javaBridge.deleteWorkspace NOT FOUND");
+        return;
+    }
+
+    window.javaBridge.deleteWorkspace(window.currentTeamId);
 }
 </script>
 

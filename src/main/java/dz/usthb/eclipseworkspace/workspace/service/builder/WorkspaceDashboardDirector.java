@@ -1,7 +1,7 @@
 package dz.usthb.eclipseworkspace.workspace.service.builder;
 
 import dz.usthb.eclipseworkspace.workspace.model.AppUser;
-import dz.usthb.eclipseworkspace.workspace.model.Task;
+import dz.usthb.eclipseworkspace.task.model.Task;
 import dz.usthb.eclipseworkspace.workspace.model.Workspace;
 import dz.usthb.eclipseworkspace.workspace.service.components.WorkspaceComposite;
 import dz.usthb.eclipseworkspace.workspace.service.components.TaskProgress;

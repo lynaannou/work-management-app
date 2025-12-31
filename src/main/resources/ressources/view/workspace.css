@@ -251,3 +251,16 @@ nav a:hover {
 .edit-btn:active {
     transform: scale(0.97);
 }
+.delete-btn {
+    background: #c0392b;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: 8px;
+}
+
+.delete-btn:hover {
+    background: #e74c3c;
+}

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECLIPSEWORK - Task List</title>
+
+    <!-- ================== STYLES (UNCHANGED) ================== -->
+    <style>
+        :root {
+            --primary: #4A6FA5;
+            --secondary: #6B8EBB;
+            --light: #F8F9FA;
+            --dark: #343A40;
+            --success: #28A745;
+            --warning: #FFC107;
+            --danger: #DC3545;
+            --border: #DEE2E6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .table-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .tasks-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .tasks-table th {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .tasks-table td {
+            padding: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-todo { background:#fff3cd; color:#856404; }
+        .status-inprogress { background:#cce5ff; color:#004085; }
+        .status-done { background:#d4edda; color:#155724; }
+
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .edit-btn { background:#4A6FA533; color:#4A6FA5; }
+        .delete-btn { background:#dc354533; color:#DC3545; }
+    </style>
+</head>
+
+<body>
+
+<!-- ================== NAVBAR ================== -->
+<nav class="navbar">
+    <div class="logo">ECLIPSEWORK</div>
+</nav>
+
+<!-- ================== TABLE ================== -->
+<div class="table-container">
+    <h1 style="margin-bottom:20px;">TASK LIST</h1>
+
+    <table class="tasks-table">
+        <thead>
+        <tr>
+            <th>TASK</th>
+            <th>DESCRIPTION</th>
+            <th>DUE</th>
+            <th>STATUS</th>
+            <th>ACTIONS</th>
+        </tr>
+        </thead>
+        <tbody id="tasksTableBody"></tbody>
+    </table>
+</div>
+
+<!-- ================== SCRIPT ================== -->
+<script>
+let currentTasks = [];
+
+/* ---------- LOAD TASKS ---------- */
+function loadTasks() {
+
+    if (!window.currentTeamId) {
+        console.warn("⏳ Waiting for currentTeamId...");
+        return;
+    }
+
+    try {
+        console.log("✅ Loading tasks for team", window.currentTeamId);
+
+        const json = window.javaBridge.loadTasksAsJson(window.currentTeamId);
+        console.log("RAW JSON FROM JAVA =", json);
+        currentTasks = JSON.parse(json);
+
+
+        renderTasks();
+
+    } catch (e) {
+        console.error("❌ loadTasks failed", e);
+        document.getElementById("tasksTableBody").innerHTML =
+            `<tr><td colspan="5">❌ Failed to load tasks</td></tr>`;
+    }
+}
+
+/* ---------- RENDER ---------- */
+function renderTasks() {
+    const tbody = document.getElementById("tasksTableBody");
+
+    if (!currentTasks || currentTasks.length === 0) {
+        tbody.innerHTML =
+            `<tr><td colspan="5">No tasks yet</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = currentTasks.map(t => `
+        <tr>
+            <td><strong>${t.title}</strong></td>
+            <td>${t.description || "-"}</td>
+            <td>${t.dueDate || "-"}</td>
+            <td>
+                <span class="status-badge status-${t.status.toLowerCase().replace("_","")}">
+                    ${t.status.replace("_"," ")}
+                </span>
+            </td>
+            <td>
+                <button class="action-btn edit-btn" onclick="editTask(${t.id})">Edit</button>
+                <button class="action-btn delete-btn" onclick="deleteTask(${t.id})">Delete</button>
+            </td>
+        </tr>
+    `).join("");
+}
+
+/* ---------- ACTIONS ---------- */
+function editTask(taskId) {
+    if (window.javaBridge && window.javaBridge.openEditTask) {
+        window.javaBridge.openEditTask(window.currentTeamId, taskId);
+    } else {
+        console.error("❌ openEditTask not available");
+    }
+}
+
+
+
+function deleteTask(id) {
+    if (!confirm("Delete this task?")) return;
+    window.javaBridge.deleteTask(id);
+    loadTasks();
+}
+
+/* ---------- SAFE INIT (JavaFX FIX) ---------- */
+function waitForTeamId() {
+    if (window.currentTeamId && window.javaBridge) {
+        loadTasks();
+    } else {
+        setTimeout(waitForTeamId, 50);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", waitForTeamId);
+</script>
+
+</body>
+</html>

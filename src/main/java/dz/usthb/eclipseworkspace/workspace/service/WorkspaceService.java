@@ -1,11 +1,12 @@
 package dz.usthb.eclipseworkspace.workspace.service;
 
 import dz.usthb.eclipseworkspace.workspace.dao.DaoWorkspace;
-import dz.usthb.eclipseworkspace.workspace.dao.DaoTask;
+import dz.usthb.eclipseworkspace.task.dao.DaoTask;
 import dz.usthb.eclipseworkspace.workspace.dao.DaoAppUser;
+import dz.usthb.eclipseworkspace.user.util.Session;
 
 import dz.usthb.eclipseworkspace.workspace.model.Workspace;
-import dz.usthb.eclipseworkspace.workspace.model.Task;
+import dz.usthb.eclipseworkspace.task.model.Task;
 import dz.usthb.eclipseworkspace.workspace.model.AppUser;
 import dz.usthb.eclipseworkspace.user.service.SecurityService;
 
@@ -22,8 +23,9 @@ import dz.usthb.eclipseworkspace.team.dao.TeamMemberDaoJdbc;
 import dz.usthb.eclipseworkspace.team.model.TeamMember;
 import dz.usthb.eclipseworkspace.user.dao.UserDao;
 
-import java.sql.Date;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +34,7 @@ public class WorkspaceService {
     private final SecurityService security = SecurityService.getInstance();
 
     private final DaoWorkspace daoWorkspace;
-    private final DaoTask daoTask;
+    private final DaoTask daoTask;              // ✅ task module DAO
     private final DaoAppUser daoAppUser;
 
     private final WorkspaceDashboardDirector director;
@@ -70,15 +72,13 @@ public class WorkspaceService {
 
         int teamId = daoWorkspace.create(name, description, leaderUserId);
 
-        // LEADER
         TeamMember leader = new TeamMember();
         leader.setTeamId((long) teamId);
         leader.setUserId(leaderUserId);
         leader.setRole("LEAD");
-        leader.setAddedAt(new Date(System.currentTimeMillis()));
+        leader.setAddedAt(new java.sql.Date(System.currentTimeMillis()));
         teamMemberDao.create(leader);
 
-        // MEMBERS
         if (memberEmails != null) {
             for (String email : memberEmails) {
                 if (email == null || email.isBlank()) continue;
@@ -91,7 +91,7 @@ public class WorkspaceService {
                                     m.setTeamId((long) teamId);
                                     m.setUserId(user.getUserId());
                                     m.setRole("MEMBER");
-                                    m.setAddedAt(new Date(System.currentTimeMillis()));
+                                    m.setAddedAt(new java.sql.Date(System.currentTimeMillis()));
                                     teamMemberDao.create(m);
                                 }
                             } catch (SQLException e) {
@@ -105,83 +105,72 @@ public class WorkspaceService {
     }
 
     // ==================================================
-    // BUILD SINGLE DASHBOARD (NO ROLE GUESSING)
+    // BUILD SINGLE DASHBOARD
     // ==================================================
     public WorkspaceDashboard getDashboard(int teamId) throws SQLException {
 
-    security.requireAuthentication();
+        security.requireAuthentication();
+        int currentUserId = security.getCurrentUserId().intValue();
 
-    int currentUserId = security.getCurrentUserId().intValue(); // 🔑 ADD THIS
+        Workspace workspace = daoWorkspace.findById(teamId).orElse(null);
+        if (workspace == null) return null;
 
-    Workspace workspace = daoWorkspace.findById(teamId).orElse(null);
-    if (workspace == null) return null;
+        List<Task> tasks = daoTask.findByTeam(teamId);
+        List<AppUser> members = daoAppUser.findMembersOfWorkspace(teamId);
 
-    List<Task> tasks = daoTask.findByTeam(teamId);
-    List<AppUser> members = daoAppUser.findMembersOfWorkspace(teamId);
+        AppUser leader = null;
+        TeamMember leaderMember =
+                teamMemberDao.findLeaderByTeamId((long) teamId).orElse(null);
 
-    // ✅ LEADER
-    AppUser leader = null;
-    TeamMember leaderMember =
-            teamMemberDao.findLeaderByTeamId((long) teamId).orElse(null);
+        if (leaderMember != null) {
+            leader = daoAppUser.findById(leaderMember.getUserId().intValue());
+        }
 
-    if (leaderMember != null) {
-        leader = daoAppUser.findById(leaderMember.getUserId().intValue());
+        WorkspaceComposite composite = new WorkspaceComposite();
+        tasks.forEach(t -> composite.addComponent(new TaskComponent(t)));
+        members.forEach(u -> composite.addComponent(new MemberComponent(u)));
+
+        WorkspaceDashboard dashboard = director.buildDashboard(
+                builder,
+                workspace,
+                tasks,
+                members,
+                leader,
+                composite,
+                computeProgress(tasks),
+                getStartPct(tasks),
+                getEndPct(tasks),
+                buildDateLabels(tasks)
+        );
+
+        teamMemberDao.findByTeamAndUser((long) teamId, (long) currentUserId)
+                .ifPresent(tm -> dashboard.setCurrentUserRole(tm.getRole()));
+
+        // ================= CURRENT USER CONTEXT =================
+AppUser currentUser = daoAppUser.findById(currentUserId);
+dashboard.setCurrentUser(currentUser);
+
+// Role already set correctly
+
+
+        return dashboard;
     }
 
-    WorkspaceComposite composite = new WorkspaceComposite();
-    tasks.forEach(t -> composite.addComponent(new TaskComponent(t)));
-    members.forEach(u -> composite.addComponent(new MemberComponent(u)));
-
-    WorkspaceDashboard dashboard = director.buildDashboard(
-            builder,
-            workspace,
-            tasks,
-            members,
-            leader,
-            composite,
-            computeProgress(tasks),
-            getStartPct(tasks),
-            getEndPct(tasks),
-            buildDateLabels(tasks)
-    );
-
-    // 🔥 THIS WAS MISSING
-    teamMemberDao.findByTeamAndUser((long) teamId, (long) currentUserId)
-            .ifPresent(tm -> dashboard.setCurrentUserRole(tm.getRole()));
-
-    return dashboard;
-}
-
-
     // ==================================================
-    // DASHBOARDS FOR USER (ROLE INJECTION)
+    // DASHBOARDS FOR USER
     // ==================================================
     public List<WorkspaceDashboard> getDashboardsForUser(int userId) throws SQLException {
 
         security.requireCanViewUser((long) userId);
 
         List<WorkspaceDashboard> dashboards = new ArrayList<>();
-
-        // 🔑 ROLE SOURCE
         List<TeamMember> memberships = teamMemberDao.findByUserId((long) userId);
 
         for (TeamMember tm : memberships) {
-
-            int teamId = tm.getTeamId().intValue();
-            String role = tm.getRole();
-
-            System.out.println(
-                    "DEBUG ROLE → teamId=" + teamId +
-                    " userId=" + userId +
-                    " role=" + role
-            );
-
-            WorkspaceDashboard dashboard = getDashboard(teamId);
+            WorkspaceDashboard dashboard = getDashboard(tm.getTeamId().intValue());
             if (dashboard == null) continue;
 
-            // ✅ ROLE INJECTION
-            dashboard.setCurrentUserRole(role);
-
+            dashboard.setCurrentUserRole(tm.getRole());
             dashboards.add(dashboard);
         }
 
@@ -208,15 +197,30 @@ public class WorkspaceService {
         List<Float> result = new ArrayList<>();
         if (tasks.isEmpty()) return result;
 
-        Date min = tasks.stream().map(Task::getStartDate).min(Date::compareTo).orElse(null);
-        Date max = tasks.stream().map(Task::getEndDate).max(Date::compareTo).orElse(null);
+        LocalDate min = tasks.stream()
+                .map(Task::getStartDate)
+                .filter(d -> d != null)
+                .min(LocalDate::compareTo)
+                .orElse(null);
+
+        LocalDate max = tasks.stream()
+                .map(Task::getDueDate)
+                .filter(d -> d != null)
+                .max(LocalDate::compareTo)
+                .orElse(null);
+
         if (min == null || max == null) return result;
 
-        MinMaxDate mm = new MinMaxDate(min, max);
-        int total = mm.getDuration();
+        long total = ChronoUnit.DAYS.between(min, max);
+        if (total == 0) total = 1;
 
         for (Task t : tasks) {
-            result.add((float) mm.getAnyDuration(min, t.getStartDate()) / total * 100f);
+            if (t.getStartDate() == null) {
+                result.add(0f);
+            } else {
+                long d = ChronoUnit.DAYS.between(min, t.getStartDate());
+                result.add((float) d / total * 100f);
+            }
         }
         return result;
     }
@@ -225,15 +229,30 @@ public class WorkspaceService {
         List<Float> result = new ArrayList<>();
         if (tasks.isEmpty()) return result;
 
-        Date min = tasks.stream().map(Task::getStartDate).min(Date::compareTo).orElse(null);
-        Date max = tasks.stream().map(Task::getEndDate).max(Date::compareTo).orElse(null);
+        LocalDate min = tasks.stream()
+                .map(Task::getStartDate)
+                .filter(d -> d != null)
+                .min(LocalDate::compareTo)
+                .orElse(null);
+
+        LocalDate max = tasks.stream()
+                .map(Task::getDueDate)
+                .filter(d -> d != null)
+                .max(LocalDate::compareTo)
+                .orElse(null);
+
         if (min == null || max == null) return result;
 
-        MinMaxDate mm = new MinMaxDate(min, max);
-        int total = mm.getDuration();
+        long total = ChronoUnit.DAYS.between(min, max);
+        if (total == 0) total = 1;
 
         for (Task t : tasks) {
-            result.add((float) mm.getAnyDuration(min, t.getEndDate()) / total * 100f);
+            if (t.getDueDate() == null) {
+                result.add(0f);
+            } else {
+                long d = ChronoUnit.DAYS.between(min, t.getDueDate());
+                result.add((float) d / total * 100f);
+            }
         }
         return result;
     }
@@ -242,17 +261,104 @@ public class WorkspaceService {
         List<String> labels = new ArrayList<>();
         if (tasks.isEmpty()) return labels;
 
-        Date min = tasks.stream().map(Task::getStartDate).min(Date::compareTo).orElse(null);
-        Date max = tasks.stream().map(Task::getEndDate).max(Date::compareTo).orElse(null);
+        LocalDate min = tasks.stream()
+                .map(Task::getStartDate)
+                .filter(d -> d != null)
+                .min(LocalDate::compareTo)
+                .orElse(null);
+
+        LocalDate max = tasks.stream()
+                .map(Task::getDueDate)
+                .filter(d -> d != null)
+                .max(LocalDate::compareTo)
+                .orElse(null);
+
         if (min == null || max == null) return labels;
 
-        MinMaxDate mm = new MinMaxDate(min, max);
-        int total = mm.getDuration();
-
-        for (int i = 0; i < total; i += 7) {
-            labels.add(new Date(min.getTime() + i * 86400000L).toString());
+        long total = ChronoUnit.DAYS.between(min, max);
+        for (int i = 0; i <= total; i += 7) {
+            labels.add(min.plusDays(i).toString());
         }
-        labels.add(max.toString());
+
         return labels;
     }
+    // ==================================================
+// DELETE WORKSPACE (LEAD ONLY)
+// ==================================================
+public void deleteWorkspace(int teamId) throws SQLException {
+
+    System.out.println("🟣 [WorkspaceService] deleteWorkspace() START teamId=" + teamId);
+
+    // 🔒 must be logged in
+    try {
+        security.requireAuthentication();
+        System.out.println("🟣 Auth OK");
+    } catch (Exception e) {
+        System.err.println("🔴 Auth FAILED");
+        throw e;
+    }
+
+    long currentUserId = security.getCurrentUserId();
+    System.out.println("🟣 Current userId=" + currentUserId);
+
+    // 1️⃣ verify membership
+    TeamMember tm;
+    try {
+        tm = teamMemberDao
+                .findByTeamAndUser((long) teamId, currentUserId)
+                .orElseThrow(() ->
+                        new SecurityException("User is not a member of this workspace")
+                );
+
+        System.out.println(
+                "🟣 Membership OK — role=" + tm.getRole() +
+                ", teamMemberId=" + tm.getTeamMemberId()
+        );
+
+    } catch (Exception e) {
+        System.err.println("🔴 Membership check FAILED");
+        throw e;
+    }
+
+    // 2️⃣ only LEAD can delete
+    if (!"LEAD".equals(tm.getRole())) {
+        System.err.println("🔴 Permission denied — role=" + tm.getRole());
+        throw new SecurityException("Only LEAD can delete workspace");
+    }
+
+    System.out.println("🟣 Role check OK (LEAD)");
+
+    // 3️⃣ delete tasks first (FK safety)
+    try {
+        System.out.println("🟣 Deleting tasks for teamId=" + teamId);
+        daoTask.deleteByTeam(teamId);
+        System.out.println("🟣 Tasks deleted");
+    } catch (Exception e) {
+        System.err.println("🔴 Task deletion FAILED");
+        throw e;
+    }
+
+    // 4️⃣ delete team members
+    try {
+        System.out.println("🟣 Deleting team members for teamId=" + teamId);
+        teamMemberDao.deleteByTeamId((long) teamId);
+        System.out.println("🟣 Team members deleted");
+    } catch (Exception e) {
+        System.err.println("🔴 Team member deletion FAILED");
+        throw e;
+    }
+
+    // 5️⃣ delete workspace itself
+    try {
+        System.out.println("🟣 Deleting workspace row teamId=" + teamId);
+        daoWorkspace.delete(teamId);
+        System.out.println("🟣 Workspace row deleted");
+    } catch (Exception e) {
+        System.err.println("🔴 Workspace deletion FAILED");
+        throw e;
+    }
+
+    System.out.println("✅ [WorkspaceService] deleteWorkspace() SUCCESS teamId=" + teamId);
+}
+
 }

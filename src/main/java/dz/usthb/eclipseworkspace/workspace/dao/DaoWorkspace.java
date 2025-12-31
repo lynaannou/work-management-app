@@ -185,4 +185,29 @@ public class DaoWorkspace {
                 rs.getInt("total_tasks_count")
         );
     }
+    // ==========================
+// DELETE WORKSPACE / TEAM
+// ==========================
+public void delete(int teamId) throws SQLException {
+
+    System.out.println("🗑️ [DaoWorkspace] delete team_id = " + teamId);
+
+    String sql = "DELETE FROM team WHERE team_id = ?";
+
+    try (
+        Connection connection = DBConnection.getConnection();
+        PreparedStatement ps = connection.prepareStatement(sql)
+    ) {
+        ps.setInt(1, teamId);
+
+        int affected = ps.executeUpdate();
+
+        if (affected == 0) {
+            throw new SQLException("Deleting workspace failed, no rows affected.");
+        }
+
+        System.out.println("✅ Workspace deleted team_id = " + teamId);
+    }
+}
+
 }

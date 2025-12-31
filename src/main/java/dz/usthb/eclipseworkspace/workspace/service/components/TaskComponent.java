@@ -1,6 +1,6 @@
 package dz.usthb.eclipseworkspace.workspace.service.components;
 
-import dz.usthb.eclipseworkspace.workspace.model.Task;
+import dz.usthb.eclipseworkspace.task.model.Task;
 
 public class TaskComponent implements WorkspaceComponent {
 

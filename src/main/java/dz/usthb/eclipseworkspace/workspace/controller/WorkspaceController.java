@@ -63,4 +63,17 @@ public class WorkspaceController {
             return -1; // ❌ signals failure
         }
     }
+// ==========================
+// DELETE PROJECT / WORKSPACE
+// ==========================
+public void deleteWorkspace(int teamId) {
+    try {
+         System.out.println("🔵 WorkspaceController.deleteWorkspace teamId=" + teamId);
+        workspaceService.deleteWorkspace(teamId);
+    } catch (Exception e) {
+        e.printStackTrace();
+        throw new RuntimeException("Failed to delete workspace", e);
+    }
+}
+
 }

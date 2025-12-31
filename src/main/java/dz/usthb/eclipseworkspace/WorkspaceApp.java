@@ -12,11 +12,16 @@ import dz.usthb.eclipseworkspace.user.util.EmailPasswordLogin;
 import dz.usthb.eclipseworkspace.user.util.PasswordHashStrategy;
 import dz.usthb.eclipseworkspace.workspace.controller.WorkspaceController;
 import dz.usthb.eclipseworkspace.workspace.dao.DaoAppUser;
-import dz.usthb.eclipseworkspace.workspace.dao.DaoTask;
 import dz.usthb.eclipseworkspace.workspace.dao.DaoWorkspace;
 import dz.usthb.eclipseworkspace.workspace.service.WorkspaceService;
 import dz.usthb.eclipseworkspace.workspace.service.builder.WorkspaceDashboardBuilder;
 import dz.usthb.eclipseworkspace.workspace.service.builder.WorkspaceDashboardDirector;
+import dz.usthb.eclipseworkspace.todo.controller.TodoController;
+import dz.usthb.eclipseworkspace.todo.dao.DaoTodoTask;
+import dz.usthb.eclipseworkspace.task.service.TaskService;
+import dz.usthb.eclipseworkspace.task.controller.TaskController;
+import dz.usthb.eclipseworkspace.task.dao.DaoTask;
+import dz.usthb.eclipseworkspace.task.dao.DaoTaskJdbc;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -33,9 +38,10 @@ public class WorkspaceApp extends Application {
         // ==========================
         // DATABASE CHECK (FAIL FAST)
         // ==========================
+        Connection connection;
         try {
             System.out.println("🔌 Attempting DB connection...");
-            Connection connection = DBConnection.getConnection();
+            connection = DBConnection.getConnection();
             System.out.println("✅ DB connection OK");
         } catch (Exception e) {
             System.err.println("❌ DATABASE CONNECTION FAILED");
@@ -44,12 +50,17 @@ public class WorkspaceApp extends Application {
         }
 
         // ==========================
+        // TASK DAO (DECLARE FIRST)
+        // ==========================
+        DaoTask daoTask = new DaoTaskJdbc();
+
+        // ==========================
         // WORKSPACE LAYER
         // ==========================
         WorkspaceService workspaceService =
                 new WorkspaceService(
                         new DaoWorkspace(),
-                        new DaoTask(),
+                        daoTask,   // ✅ now valid
                         new DaoAppUser(),
                         new WorkspaceDashboardDirector(),
                         new WorkspaceDashboardBuilder()
@@ -63,6 +74,7 @@ public class WorkspaceApp extends Application {
         // ==========================
         UserDao userDao = new UserDao();
         PasswordHashStrategy hash = new BCryptHashStrategy();
+
         EmailPasswordLogin login =
                 new EmailPasswordLogin(userDao, hash);
 
@@ -76,7 +88,22 @@ public class WorkspaceApp extends Application {
                 new UserService(userDao, hash);
 
         // ==========================
-        // UI / WEBVIEW
+        // TASK SERVICE + CONTROLLER
+        // ==========================
+        TaskService taskService =
+                new TaskService(daoTask);
+
+        TaskController taskController =
+                new TaskController(taskService);
+
+        // ==========================
+        // TODO SERVICE + CONTROLLER
+        // ==========================
+        TodoController todoController =
+                new TodoController(new DaoTodoTask(connection));
+
+        // ==========================
+        // UI
         // ==========================
         WebView webView = new WebView();
 
@@ -85,7 +112,9 @@ public class WorkspaceApp extends Application {
                 authService,
                 userService,
                 workspaceService,
-                workspaceController
+                workspaceController,
+                todoController,
+                taskController
         );
 
         stage.setScene(new Scene(webView, 1300, 750));

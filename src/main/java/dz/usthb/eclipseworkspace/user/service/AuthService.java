@@ -133,5 +133,71 @@ public class AuthService {
     public void logout(String token) {
         Session.getInstance().clear();
     }
+    // ============================================
+// SESSION ACCESSORS (CORRECT – NO ROLE HERE)
+// ============================================
+
+/**
+ * Ensure a user is authenticated.
+ * @throws AuthenticationException if not logged in
+ */
+public void requireAuthentication() {
+    Session session = Session.getInstance();
+
+    if (!session.isAuthenticated()) {
+        throw new AuthenticationException("User is not authenticated");
+    }
+
+    if (session.getUserId() == null) {
+        throw new AuthenticationException("Authenticated session has no user ID");
+    }
+}
+
+/**
+ * Get currently authenticated user.
+ * @throws AuthenticationException if not logged in
+ */
+public User getCurrentUser() {
+    requireAuthentication();
+
+    User user = Session.getInstance().getCurrentUser();
+    if (user == null) {
+        throw new AuthenticationException("Session exists but user is null");
+    }
+
+    return user;
+}
+
+/**
+ * Get current authenticated user ID.
+ * (This is what delete/edit NEEDS)
+ */
+public Long getCurrentUserId() {
+    requireAuthentication();
+    return Session.getInstance().getUserId();
+}
+
+/**
+ * Check if a user is logged in (NO exception).
+ * For UI logic only.
+ */
+public boolean isAuthenticated() {
+    return Session.getInstance().isAuthenticated();
+}
+
+/**
+ * Debug helper – prints session state (NO ROLE).
+ */
+public void logSessionState(String context) {
+    Session session = Session.getInstance();
+
+    System.out.println(
+        "[SESSION][" + context + "] " +
+        "authenticated=" + session.isAuthenticated() +
+        ", userId=" + session.getUserId() +
+        ", token=" + (session.getToken() != null ? "present" : "null")
+    );
+}
+
 
 }

@@ -8,6 +8,28 @@ import java.util.List;
 import java.util.Optional;
 
 public class TeamMemberDaoJdbc implements TeamMemberDao {
+    @Override
+public boolean existsForTask(Long teamMemberId, Long taskId) throws SQLException {
+
+    String sql = """
+        SELECT 1
+        FROM task t
+        WHERE t.task_id = ?
+          AND t.team_member_id = ?
+    """;
+
+    try (Connection conn = DBConnection.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setLong(1, taskId);
+        ps.setLong(2, teamMemberId);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            return rs.next();
+        }
+    }
+}
+
     
     @Override
     public Long create(TeamMember teamMember) throws SQLException {
@@ -137,7 +159,23 @@ public Optional<TeamMember> findLeaderByTeamId(Long teamId) throws SQLException 
             return ps.executeUpdate() > 0;
         }
     }
-    
+    // ==========================
+// DELETE ALL MEMBERS OF A TEAM
+// ==========================
+public void deleteByTeamId(Long teamId) throws SQLException {
+
+    System.out.println("🧹 [TeamMemberDao] deleteByTeamId team_id = " + teamId);
+
+    String sql = "DELETE FROM team_member WHERE team_id = ?";
+
+    try (Connection conn = DBConnection.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setLong(1, teamId);
+        ps.executeUpdate();
+    }
+}
+
     @Override
     public boolean delete(Long teamMemberId) throws SQLException {
         String sql = "DELETE FROM team_member WHERE team_member_id = ?";

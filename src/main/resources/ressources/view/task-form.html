@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>ECLIPSEWORK - Task</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        :root {
+            --primary: #4A6FA5;
+            --secondary: #6B8EBB;
+            --dark: #343A40;
+            --border: #DEE2E6;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .navbar {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 15px 30px;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .task-form-container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .form-title {
+            font-size: 28px;
+            margin-bottom: 25px;
+            color: var(--dark);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid var(--border);
+        }
+
+        textarea {
+            min-height: 120px;
+        }
+
+        .status-badges {
+            display: flex;
+            gap: 10px;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .status-badge.selected {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 14px;
+            width: 100%;
+            border-radius: 10px;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar">
+    <div class="logo">ECLIPSEWORK</div>
+</nav>
+
+<div class="task-form-container">
+    <h1 class="form-title">NEW TASK</h1>
+
+    <div class="form-group">
+        <label>TASK TITLE</label>
+        <input id="taskTitle">
+    </div>
+
+    <div class="form-group">
+        <label>DESCRIPTION</label>
+        <textarea id="taskDescription"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label>DUE DATE</label>
+        <input type="date" id="dueDate">
+    </div>
+
+    <div class="form-group">
+        <label>STATUS</label>
+        <div class="status-badges">
+            <div class="status-badge selected" data-status="TODO">TODO</div>
+            <div class="status-badge" data-status="IN_PROGRESS">IN PROGRESS</div>
+            <div class="status-badge" data-status="DONE">DONE</div>
+        </div>
+    </div>
+
+    <button class="btn-save" onclick="saveTask()">✓ SAVE</button>
+</div>
+
+<script>
+let currentStatus = "TODO";
+let originalTask = null;
+
+/* ===============================
+   LOAD TASK FOR EDIT
+================================ */
+function loadTaskForEdit() {
+
+    if (!window.currentTaskId || !window.currentTeamId) return;
+
+    const tasks = JSON.parse(
+        window.javaBridge.loadTasksAsJson(window.currentTeamId)
+    );
+
+    const task = tasks.find(t => t.id === window.currentTaskId);
+    if (!task) return;
+
+    originalTask = task;
+
+    document.getElementById("taskTitle").value = task.title || "";
+    document.getElementById("taskDescription").value = task.description || "";
+    document.getElementById("dueDate").value = task.dueDateIso || "";
+
+    currentStatus = task.status;
+
+    document.querySelectorAll(".status-badge").forEach(b =>
+        b.classList.toggle("selected", b.dataset.status === task.status)
+    );
+
+    document.querySelector(".form-title").textContent = "EDIT TASK";
+}
+
+/* ===============================
+   STATUS SELECTION
+================================ */
+document.querySelectorAll(".status-badge").forEach(badge => {
+    badge.onclick = () => {
+        document.querySelectorAll(".status-badge")
+            .forEach(b => b.classList.remove("selected"));
+        badge.classList.add("selected");
+        currentStatus = badge.dataset.status;
+    };
+});
+
+/* ===============================
+   SAVE TASK
+================================ */
+function saveTask() {
+
+    const title = taskTitle.value.trim();
+    const description = taskDescription.value.trim();
+    const dueDate = dueDateInput = document.getElementById("dueDate").value;
+
+    if (!title || !dueDate) {
+        alert("Title and due date required");
+        return;
+    }
+
+    // ================= EDIT MODE =================
+    if (window.currentTaskId && originalTask) {
+
+        if (title !== originalTask.title) {
+            window.javaBridge.updateTaskTitle(window.currentTaskId, title);
+        }
+
+        if (description !== (originalTask.description || "")) {
+            window.javaBridge.updateTaskDescription(window.currentTaskId, description);
+        }
+
+        if (dueDate !== originalTask.dueDateIso) {
+            window.javaBridge.updateTaskDueDate(window.currentTaskId, dueDate);
+        }
+
+        if (currentStatus !== originalTask.status) {
+            const action =
+                currentStatus === "DONE" ? "COMPLETE" :
+                currentStatus === "IN_PROGRESS" ? "START" : "CANCEL";
+
+            window.javaBridge.changeTaskStatus(window.currentTaskId, action);
+        }
+
+        window.java.openTasks(window.currentTeamId);
+        return;
+    }
+
+    // ================= CREATE MODE =================
+    window.javaBridge.createTask(
+        title,
+        description,
+        window.currentTeamId,
+        dueDate,
+        null
+    );
+
+    window.java.openTasks(window.currentTeamId);
+}
+
+/* ===============================
+   INIT
+================================ */
+document.addEventListener("DOMContentLoaded", loadTaskForEdit);
+</script>
+
+</body>
+</html>
