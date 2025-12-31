@@ -1,5 +1,4 @@
 package dz.usthb.eclipseworkspace.user.util;
-import dz.usthb.eclipseworkspace.user.exception.AuthenticationException;
 import org.mindrot.jbcrypt.BCrypt;
 
 public class BCryptHashStrategy implements PasswordHashStrategy{

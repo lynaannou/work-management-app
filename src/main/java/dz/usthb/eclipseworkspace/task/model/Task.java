@@ -229,4 +229,5 @@ public void setStateFromString(String status) {
     public void setAssigneeLastName(String lastName) {
         this.assigneeLastName = lastName;
     }
+    
 }

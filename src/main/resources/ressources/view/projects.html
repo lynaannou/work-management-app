@@ -46,7 +46,7 @@
   <thead>
     <tr>
       <th>PROJECT</th>
-      <th>DESCRIPTION</th>
+      <th class="col-description">DESCRIPTION</th>
       <th>ROLE</th>
       <th class="col-center">TASKS</th>
       <th class="col-center">PROGRESSION</th>
@@ -61,7 +61,7 @@
 <script>
 function loadProjects(data) {
   console.log("📥 loadProjects called:", data);
-
+  
   if (!data || data.length === 0) {
     console.warn("⚠️ No projects received");
     return;
@@ -105,7 +105,12 @@ function loadProjects(data) {
         </div>
       </td>
 
-      <td>${ws.workspace.description || "—"}</td>
+      <td class="col-description">
+      <div class="description-cell">
+        ${ws.workspace.description || "—"}
+      </div>
+    </td>
+
 
       <td>
         <span class="role ${roleClass}">
@@ -200,6 +205,7 @@ function initUserContext() {
 }
 
 initUserContext();
+
 </script>
 
 </body>

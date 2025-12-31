@@ -8,13 +8,15 @@ public class Workspace {
     private int teamId;
     private String name;
     private Date createdAt;
-
+    private String description;
+    
     private int openTasksCount;
     private int doneTasksCount;
     private int totalTasksCount;
 
     public Workspace(int teamId,
                      String name,
+                     String description,
                      Date createdAt,
                      int openTasksCount,
                      int doneTasksCount,
@@ -22,6 +24,7 @@ public class Workspace {
 
         this.teamId = teamId;
         this.name = name;
+        this.description = description;
         this.createdAt = createdAt;
         this.openTasksCount = openTasksCount;
         this.doneTasksCount = doneTasksCount;
@@ -42,6 +45,8 @@ public class Workspace {
     public void setOpenTasksCount(int openTasksCount) { this.openTasksCount = openTasksCount; }
     public void setDoneTasksCount(int doneTasksCount) { this.doneTasksCount = doneTasksCount; }
     public void setTotalTasksCount(int totalTasksCount) { this.totalTasksCount = totalTasksCount; }
-    
+    public String getDescription() {return description;}
+    public void setDescription(String description) {this.description = description;}
+
 
 }

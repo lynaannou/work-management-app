@@ -176,15 +176,20 @@ public class DaoWorkspace {
     // ROW MAPPER (SINGLE SOURCE)
     // ==========================
     private Workspace mapRow(ResultSet rs) throws SQLException {
-        return new Workspace(
-                rs.getInt("team_id"),
-                rs.getString("name"),
-                rs.getDate("created_at"),
-                rs.getInt("open_tasks_count"),
-                rs.getInt("done_tasks_count"),
-                rs.getInt("total_tasks_count")
-        );
-    }
+
+    Workspace ws = new Workspace(
+            rs.getInt("team_id"),
+            rs.getString("name"),
+            rs.getString("description"),
+            rs.getDate("created_at"),    
+            rs.getInt("open_tasks_count"),
+            rs.getInt("done_tasks_count"),
+            rs.getInt("total_tasks_count")
+    );
+
+    return ws;
+}
+
     // ==========================
 // DELETE WORKSPACE / TEAM
 // ==========================

@@ -4,14 +4,12 @@ import dz.usthb.eclipseworkspace.common.json.GsonProvider;
 import dz.usthb.eclipseworkspace.task.controller.TaskController;
 import dz.usthb.eclipseworkspace.team.controller.TeamController;
 import dz.usthb.eclipseworkspace.todo.controller.TodoController;
-import dz.usthb.eclipseworkspace.user.exception.AuthenticationException;
 import dz.usthb.eclipseworkspace.user.model.User;
 import dz.usthb.eclipseworkspace.user.service.AuthService;
 import dz.usthb.eclipseworkspace.user.service.UserService;
 import dz.usthb.eclipseworkspace.user.util.Session;
 import dz.usthb.eclipseworkspace.user.util.UserRole;
 import dz.usthb.eclipseworkspace.team.dao.TeamMemberDaoJdbc;
-import dz.usthb.eclipseworkspace.team.model.TeamMember;
 import dz.usthb.eclipseworkspace.workspace.controller.WorkspaceController;
 
 import java.util.Arrays;
